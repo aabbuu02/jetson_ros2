@@ -1,0 +1,5 @@
+---
+graph_creator_msgs/GraphCreatorState state
+
+bool success
+string message

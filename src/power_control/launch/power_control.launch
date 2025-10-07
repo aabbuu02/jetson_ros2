@@ -1,0 +1,10 @@
+<launch>
+    <arg name="system_name" default="$(anon device)" doc="Power control system name"/>
+    <arg name="config_file" default="$(find power_control)/config/power_control.yaml" doc="Configuration file for power control"/>
+    <arg name="output_to" default="screen" doc="Output to screen or log"/>
+
+    <node name="power_control_$(arg system_name)" pkg="power_control" type="power_control_node" output="$(arg output_to)">
+        <rosparam file="$(arg config_file)" command="load"/>
+    </node>
+
+</launch>

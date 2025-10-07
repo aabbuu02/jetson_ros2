@@ -1,0 +1,6 @@
+string order_id
+GoalMsg goal_type
+---
+bool success
+---
+float32 percentage

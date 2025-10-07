@@ -1,0 +1,10 @@
+float32 cleaning_hour
+float32 cleaning_size
+
+uint8 USE_TIME_AND_SIZE=0
+uint8 BASED_ON_TIME=1
+uint8 BASED_ON_SIZE=2
+
+uint8 mode
+---
+string message

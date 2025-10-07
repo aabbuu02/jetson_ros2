@@ -1,0 +1,5 @@
+bool mission_reset
+bool total_reset
+---
+float32 mission_distance
+float32 total_distance

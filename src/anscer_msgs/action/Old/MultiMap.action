@@ -1,0 +1,10 @@
+#goal definition
+string transition_goal_pose
+string transition_map
+string transition_initial_pose
+---
+#result definition
+bool results
+---
+#feedback
+int32 feedbacks

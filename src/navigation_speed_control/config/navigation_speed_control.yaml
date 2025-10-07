@@ -1,0 +1,8 @@
+controller_type: pure              #Whether to use pure/lyapunov
+field_topic: lidar_fields
+selector_switch_topic: mode_selection
+pre_navigation_topic: pre_navigation/cmd_vel
+navigation_topic: navigation/cmd_vel
+zone_info_topic: zone_info
+speed_factor: 0.8                       #Factor of maximum speed
+speed_value: 0.7

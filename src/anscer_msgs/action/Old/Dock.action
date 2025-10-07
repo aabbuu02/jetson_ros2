@@ -1,0 +1,17 @@
+#goal definition
+int8 dock_marker
+int8 dock_mode
+
+int8 inplace_id
+float32 undock_distance  #This will also be depreciated
+---
+#result definition
+bool is_success
+
+---
+#feedback
+anscer_msgs/DockInfo dock_info
+float32 undock_distance_remaining
+bool dock_found
+int8 controller_status
+

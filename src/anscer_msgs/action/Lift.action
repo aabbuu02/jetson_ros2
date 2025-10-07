@@ -1,0 +1,11 @@
+#goal definition
+int8 system_activate
+
+---
+#result definition
+bool is_success
+
+---
+#feedback
+int8 lifter_feedback
+string lifter_status

@@ -1,0 +1,3 @@
+string timestamp
+float32 current_distance
+float32 total_distance

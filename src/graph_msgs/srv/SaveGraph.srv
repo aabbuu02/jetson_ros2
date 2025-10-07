@@ -1,0 +1,17 @@
+# Either use absolute path to save the graph file like /path/to/save/ or
+# use a relative path to a package. For example, package_name/graphs/.
+# In case of graph file save being relative to a package, use of '/' is not required.
+# The graph name is used to create the filename, for example, graph_file_name.graphml.
+# Finally, the graph will be save at save_graph_url/graph_file_name.graphml. 
+string graph_file_name
+string save_graph_url
+---
+# Result code defintions
+uint8 RESULT_SUCCESS=0
+uint8 RESULT_GRAPH_ALREADY_EXISTS=1
+uint8 RESULT_INVALID_GRAPH_FILE_NAME=2
+uint8 RESULT_INVALID_GRAPH_FILE_PATH=3
+uint8 RESULT_UNDEFINED_FAILURE=255
+
+graph_msgs/Graph graph
+uint8 result

@@ -1,0 +1,17 @@
+string unique_id
+string date
+int16 priority
+int16 rack
+int16 shelf
+int16 bin
+bool action
+bool status
+string ean_code
+string putaway_code
+int16 acr_shelf
+string whole_bin_no
+string core
+string level
+string year
+string date_data
+string serial_no

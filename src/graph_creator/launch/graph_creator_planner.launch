@@ -1,0 +1,19 @@
+<launch>
+
+    <arg name="goal_topic" default="/graph_creator_planner/goal" doc="The global planner goal topic"/>
+    <arg name="use_static_tf" default="false" doc="Use a static transform from map to base link"/>
+    <arg name="ccp_config_file" default="$(find graph_creator)/config/costmap_common_params.yaml" doc="Global costmap common parameters configuration file"/>
+    <arg name="gcp_config_file" default="$(find graph_creator)/config/global_costmap_params.yaml" doc="Global costmap parameters configuration file"/>
+    <arg name="global_costmap_ns" default="/graph_creator_planner/costmap" doc="The namespace under which the the global costmap configuration files are loaded"/>
+ 
+    <node name="gc_static_tf" pkg="tf" type="static_transform_publisher" 
+          args="0 0 0 0 0 0 /map /dummy_base_link 100" if="$(arg use_static_tf)"/>
+
+    <node name="graph_creator_planner" pkg="global_planner" type="planner">
+       <remap from="/graph_creator_planner/goal" to="$(arg goal_topic)"/>
+    </node>
+
+    <rosparam file="$(arg ccp_config_file)" command="load" ns="$(arg global_costmap_ns)"/>
+    <rosparam file="$(arg gcp_config_file)" command="load" ns="$(arg global_costmap_ns)"/>
+
+</launch>

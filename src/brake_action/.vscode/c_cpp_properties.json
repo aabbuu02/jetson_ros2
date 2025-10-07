@@ -1,0 +1,37 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/jishnu/ANSCER_ws/devel/include/**",
+        "/home/jishnu/catkin_ws/devel/include/**",
+        "/home/jishnu/test_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/jishnu/ANSCER_ws/src/bms_data/include/**",
+        "/home/jishnu/ANSCER_ws/src/break_action/include/**",
+        "/home/jishnu/catkin_ws/src/current_sensor/include/**",
+        "/home/jishnu/test_ws/src/led_controller/include/**",
+        "/home/jishnu/ANSCER_ws/src/lift_action/include/**",
+        "/home/jishnu/catkin_ws/src/lower_level_controller/include/**",
+        "/home/jishnu/test_ws/src/modify_yaml/include/**",
+        "/home/jishnu/catkin_ws/src/moons_motor_driver/include/**",
+        "/home/jishnu/catkin_ws/src/path_follower/include/**",
+        "/home/jishnu/catkin_ws/src/anscer_agv/qr_navigation/include/**",
+        "/home/jishnu/catkin_ws/src/ROS-Driver/ROS-Driver-Update/roboteq_motor_controller_driver/include/**",
+        "/home/jishnu/test_ws/src/serial_controller/include/**",
+        "/home/jishnu/test_ws/src/thermal_monitor/include/**",
+        "/home/jishnu/ANSCER_ws/src/wms_data/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

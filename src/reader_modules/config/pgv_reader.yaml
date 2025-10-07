@@ -1,0 +1,7 @@
+port_name: /dev/ttyUSB0
+barcode_local_topic: barcode/local
+barcode_global_topic: barcode/global
+csv_file_name: HybridData.csv
+baud_rate: 115200
+angle_offset: 270  # in degree
+loop_rate: 50.0

@@ -1,0 +1,22 @@
+#goal definition
+bool aruco_charging
+bool reflector_charging
+bool general_docking
+bool vlmarker_charging
+
+bool start_dock
+bool start_undock
+
+int8 inplace_id
+float32 undock_distance
+---
+#result definition
+bool is_success
+
+---
+#feedback
+anscer_msgs/DockInfo dock_info
+float32 undock_distance_remaining
+bool dock_found
+int8 controller_status
+

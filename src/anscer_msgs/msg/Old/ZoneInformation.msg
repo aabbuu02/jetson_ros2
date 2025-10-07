@@ -1,0 +1,2 @@
+anscer_msgs/Indication indication_info
+float32 speed_factor

@@ -1,0 +1,1 @@
+StaticLidars[] sensor

@@ -1,0 +1,4 @@
+string start_date
+string end_date
+---
+anscer_msgs/BatteryDB[] battery_db

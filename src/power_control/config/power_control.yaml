@@ -1,0 +1,10 @@
+# Current system's settings 
+system_name: "nx"                  # Name of the this system
+is_system_master: true              # Whether the current system is master or not
+
+# Slave systems' settings
+# NOTE: If the current system is not a master, slave settings will be disregarded
+slave_system_names: []
+
+enable_system_power_control: true   # Whether the current system's power control should be used when activated
+enable_slave_power_control: false    # Whether to enable slave power control when master power control is used 

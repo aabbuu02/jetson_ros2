@@ -1,0 +1,23 @@
+<launch>
+
+    <arg name="output_to" default="screen" doc="Output to screen or log"/>
+    <arg name="use_rviz" default="false" doc="Open RViz GUI when starting graph creator"/>
+    <arg name="use_map_server" default="false" doc="Use a map server"/>
+    <arg name="map_file" default="$(find graph_creator)/maps/willow_garage.yaml" doc="The map file to use with the map server"/>
+
+    <node name="graph_creator" pkg="graph_creator" type="graph_creator" output="$(arg output_to)"/>
+
+    <group if="$(arg use_rviz)">
+        <include file="$(find graph_creator)/launch/graph_creator_rviz.launch">
+            <arg name="rviz_required" value="false"/>
+            <arg name="output_to" value="log"/>
+        </include>
+    </group>
+
+    <group if="$(arg use_map_server)">
+        <include file="$(find graph_creator)/launch/graph_creator_map.launch">
+            <arg name="map_yaml_file" value="$(arg map_file)"/>    
+        </include>
+    </group>
+
+</launch>

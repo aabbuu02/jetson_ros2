@@ -1,0 +1,11 @@
+#goal definition
+int16 wait_time
+bool wait_activate
+---
+#result definition
+bool is_success
+
+---
+#feedback
+bool wait_feedback
+int32 time_elapsed

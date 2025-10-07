@@ -1,0 +1,794 @@
+<?xml version ="1.0"?>
+<robot name="anscer_amr">
+
+  <!-- <physics type='ode'>
+    <max_step_size>0.001</max_step_size>
+    <real_time_factor>1</real_time_factor>
+    <real_time_update_rate>1000</real_time_update_rate>
+    <gravity>0 0 -9.8</gravity>
+  </physics>
+  -->
+
+<!--
+//base link -->
+<link name="base_footprint">
+</link>
+<link name="base_link">
+      <collision>
+        <geometry>
+          <mesh filename="package://anscer_description/meshes/amr_chassis.dae" scale="1 1 1"/>
+        </geometry>
+        <origin rpy="0 0 1.5708" xyz="0 0 -0.0725"/>
+      </collision>
+    <visual>
+      <geometry>
+      <mesh filename="package://anscer_description/meshes/amr_chassis.dae" scale="1 1 1"/>
+      </geometry>
+      <origin rpy="0 0 1.5708" xyz="0 0 -0.0725"/>
+    <material name="white">
+      <color rgba="1 1 0 1"/>
+    </material>
+  </visual>
+  <inertial>
+    <origin rpy="0 0 1.5708" xyz="0 0 -0.0725"/>
+    <mass value="10"/>
+    <inertia ixx="1" ixy="0" ixz="0"
+       iyy="1" iyz="0"
+       
+       izz="1"/>
+     </inertial>
+
+</link>
+  <joint name="base_footprint_to_base_link" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.0915" rpy="0 0 0"/>
+  </joint>
+<link name="base_link_dock" ></link>
+<joint name="base_dock_to_base_link" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link_dock"/>
+    <origin xyz="0 0 0" rpy="0 0 3.14159"/>
+  </joint>
+
+
+  <!-- wheel  -->
+  <!--  -->
+
+  <!--right_mWheel-->
+         <joint name="right_mWheel_to_base_link" type="continuous">
+         <parent link="base_link"/>
+         <child link="right_mWheel"/>
+         <axis xyz="0 0 1"/>
+          <origin xyz="0 -.160 -0.0325" rpy="1.5708 0 3.14"/>
+        </joint >
+
+         <link name="right_mWheel">
+              <collision>
+                <geometry>
+                    <cylinder length="0.033" radius="0.06"/>
+                </geometry>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+              </collision>
+          <visual>
+                <geometry>
+                <cylinder length="0.033" radius="0.06"/>
+                </geometry>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+            <material name="white"/>
+            </visual>
+            <inertial>
+              <origin rpy="0 0 0" xyz="6.61391e-12 -5.48221e-18 -1.09644e-17"/>
+              <mass value=".372"/>
+              <inertia ixx="0.0004067" ixy="0" ixz="-3.271e-19"
+                  iyy="0.0007458" iyz="-2.453e-19"
+                 izz="0.0004067"/>
+            </inertial>
+         </link>
+
+  <!-- left wheel -->
+
+  <joint name="left_mWheel_to_base_link" type="continuous">
+  <parent link="base_link"/>
+  <child link="left_mWheel"/>
+  <axis xyz="0 0 1"/>
+    <origin xyz="0 .160 -0.0325" rpy="1.5708 0 3.14"/>
+  </joint >
+
+  <link name="left_mWheel">
+       <collision>
+         <geometry>
+             <cylinder length="0.033" radius="0.06"/>
+         </geometry>
+         <origin rpy="0 0 0" xyz="0 0 0"/>
+       </collision>
+   <visual>
+         <geometry>
+         <cylinder length="0.033" radius="0.06"/>
+         </geometry>
+         <origin rpy="0 0 0" xyz="0 0 0"/>
+     <material name="white"/>
+     </visual>
+     <inertial>
+       <origin rpy="0 0 0" xyz="6.61391e-12 -5.48221e-18 -1.09644e-17"/>
+       <mass value=".372"/>
+       <inertia ixx="0.0004067" ixy="0" ixz="-3.271e-19"
+           iyy="0.0007458" iyz="-2.453e-19"
+          izz="0.0004067"/>
+     </inertial>
+  </link>
+
+
+<!-- caster wheels -->
+
+
+<joint name="front_left_casterWheel_to_base_link" type="continuous">
+<parent link="base_link"/>
+<child link="front_left_casterWheel"/>
+<axis xyz="0 0 1"/>
+ <origin xyz="0.2665 0.132 -0.0725" rpy="1.5708 0 0"/>
+</joint >
+
+<link name="front_left_casterWheel">
+     <collision>
+       <geometry>
+           <sphere radius="0.019"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+     </collision>
+ <visual>
+       <geometry>
+       <sphere radius="0.019"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+   <material name="white"/>
+   </visual>
+
+     <inertial>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+       <mass value=".10"/>
+       <inertia ixx="4.11e-13" ixy="0" ixz="0"
+           iyy="4.11e-13" iyz="0.0"
+          izz="4.11e-13"/>
+
+   </inertial>
+</link>
+
+
+<joint name="back_left_casterWheel_to_base_link" type="continuous">
+<parent link="base_link"/>
+<child link="back_left_casterWheel"/>
+<axis xyz="0 0 1"/>
+ <origin xyz="-0.2665 0.132 -0.0725" rpy="1.5708 0 0"/>
+</joint >
+
+<link name="back_left_casterWheel">
+     <collision>
+       <geometry>
+           <sphere radius="0.019"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+     </collision>
+ <visual>
+       <geometry>
+       <sphere radius="0.019"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+   <material name="white"/>
+   </visual>
+
+     <inertial>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+       <mass value=".10"/>
+       <inertia ixx="4.11e-13" ixy="0" ixz="0"
+           iyy="4.11e-13" iyz="0.0"
+          izz="4.11e-13"/>
+
+   </inertial>
+</link>
+
+
+
+<joint name="back_right_casterWheel_to_base_link" type="continuous">
+<parent link="base_link"/>
+<child link="back_right_casterWheel"/>
+<axis xyz="0 0 1"/>
+<origin xyz="-0.2665 -0.132 -0.0725" rpy="1.5708 0 0"/>
+</joint >
+
+<link name="back_right_casterWheel">
+     <collision>
+       <geometry>
+           <sphere radius="0.019"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+     </collision>
+ <visual>
+       <geometry>
+       <sphere radius="0.019"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+   <material name="white"/>
+   </visual>
+
+     <inertial>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+       <mass value=".10"/>
+       <inertia ixx="4.11e-13" ixy="0" ixz="0"
+           iyy="4.11e-13" iyz="0.0"
+          izz="4.11e-13"/>
+
+   </inertial>
+</link>
+
+<joint name="front_right_casterWheel_to_base_link" type="continuous">
+<parent link="base_link"/>
+<child link="front_right_casterWheel"/>
+<axis xyz="0 0 1"/>
+ <origin xyz="0.2665 -0.132 -0.0725" rpy="1.5708 0 0"/>
+</joint >
+
+<link name="front_right_casterWheel">
+     <collision>
+       <geometry>
+           <sphere radius="0.019"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+     </collision>
+ <visual>
+       <geometry>
+       <sphere radius="0.019"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+   <material name="white"/>
+   </visual>
+
+     <inertial>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+       <mass value=".10"/>
+       <inertia ixx="4.11e-13" ixy="0" ixz="0"
+           iyy="4.11e-13" iyz="0.0"
+          izz="4.11e-13"/>
+
+   </inertial>
+</link>
+
+<gazebo reference="front_right_casterWheel">
+  <mu1>1</mu1>
+  <mu2>1</mu2>
+  <kp>10000000.0</kp>
+  <kd>100.0</kd>
+  <minDepth>0.001</minDepth>
+  <maxVel>3000</maxVel>
+  <fdir1>0 0 0</fdir1>
+  <material>Gazebo/Black</material>
+</gazebo>
+<gazebo reference="back_right_casterWheel">
+  <mu1>1</mu1>
+  <mu2>1</mu2>
+  <kp>10000000.0</kp>
+  <kd>100.0</kd>
+  <minDepth>0.001</minDepth>
+  <maxVel>3000</maxVel>
+  <fdir1>0 0 0</fdir1>
+  <material>Gazebo/Black</material>
+</gazebo>
+<gazebo reference="back_left_casterWheel">
+  <mu1>1</mu1>
+  <mu2>1</mu2>
+  <kp>10000000.0</kp>
+  <kd>100.0</kd>
+  <minDepth>0.001</minDepth>
+  <maxVel>3000</maxVel>
+  <fdir1>0 0 0</fdir1>
+  <material>Gazebo/Black</material>
+</gazebo>
+
+<gazebo reference="front_left_casterWheel">
+  <mu1>1</mu1>
+  <mu2>1</mu2>
+  <kp>10000000.0</kp>
+  <kd>100.0</kd>
+  <minDepth>0.001</minDepth>
+  <maxVel>3000</maxVel>
+  <fdir1>0 0 0</fdir1>
+  <material>Gazebo/Black</material>
+</gazebo>
+<gazebo reference="base_link">
+  <mu1>1000</mu1>
+  <mu2>1000</mu2>
+  <kp>10000000.0</kp>
+  <kd>100.0</kd>
+  <minDepth>0.001</minDepth>
+  <maxVel>3000</maxVel>
+  <fdir1>0 0 0</fdir1>
+
+</gazebo>
+
+<gazebo reference="right_mWheel">
+  <mu1>1000</mu1>
+  <mu2>1000</mu2>
+  <kp>10000000.0</kp>
+  <kd>100.0</kd>
+  <minDepth>0.001</minDepth>
+  <maxVel>3000</maxVel>
+  <fdir1>1 1 1</fdir1>
+  <material>Gazebo/Black</material>
+</gazebo>
+<gazebo reference="left_mWheel">
+  <mu1>1000</mu1>
+  <mu2>1000</mu2>
+  <kp>10000000.0</kp>
+  <kd>100.0</kd>
+  <minDepth>0.001</minDepth>
+  <maxVel>3000</maxVel>
+  <fdir1>1 1 1</fdir1>
+  <material>Gazebo/Black</material>
+</gazebo>
+
+<!--  -->
+
+    <joint name="lidar_to_base_base_link" type="fixed">
+      <parent link="base_link"/>
+      <child link="lidar_link"/>
+  <origin rpy="0 0 0" xyz="0 0 0.1"/>
+    </joint>
+<link name="lidar_link">
+    </link>
+
+
+
+
+
+
+ <gazebo reference="lidar_link">
+        <sensor type="ray" name="Velodyne-HDL32E">
+          <pose>0 0 0 0 0 0</pose>
+          <visualize>true</visualize>
+          <update_rate>15</update_rate>
+          <ray>
+            <scan>
+              <horizontal>
+                <samples>10</samples>
+                <resolution>1</resolution>
+                <min_angle>-1.57</min_angle>
+                <max_angle>1.57</max_angle>
+              </horizontal>
+              <vertical>
+                <samples>32</samples>
+                <resolution>1</resolution>
+                <min_angle>0.0</min_angle>
+                <max_angle>0.38</max_angle>
+              </vertical>
+            </scan>
+            <range>
+              <min>0.9</min>
+              <max>10</max>
+              <resolution>1</resolution>
+            </range>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.0</stddev>
+            </noise>
+          </ray>
+          <!--plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_velodyne_laser.so">
+            <topicName>scan_cloud</topicName>
+            <frameName>lidar_link</frameName>
+            <organize_cloud>${organize_cloud}</organize_cloud>
+            <min_range>0.9</min_range>
+            <max_range>10</max_range>
+            <gaussianNoise>0</gaussianNoise>
+          </plugin-->
+        </sensor>
+
+    </gazebo>
+
+
+
+
+
+
+<!--  -->
+
+<link name="imu_link">
+</link>
+
+
+<joint name="imu_to_base_base_link" type="fixed">
+<parent link="base_link"/>
+<child link="imu_link"/>
+ <origin rpy="0 0 0" xyz="0 0 0"/>
+</joint>
+
+                    <gazebo reference="imu_link">
+                      <gravity>true</gravity>
+                      <sensor name="imu_sensor" type="imu">
+                        <always_on>true</always_on>
+                        <update_rate>50</update_rate>
+                        <visualize>true</visualize>
+                        <topic>__default_topic__</topic>
+                        <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+                          <topicName>imu</topicName>
+                          <bodyName>imu_link</bodyName>
+                          <updateRateHZ>60</updateRateHZ>
+                          <gaussianNoise>0.0</gaussianNoise>
+                          <xyzOffset>0 0 0</xyzOffset>
+                          <rpyOffset>0 0 0</rpyOffset>
+                          <frameName>imu_link</frameName>
+                        </plugin>
+                        <pose>0 0 0 0 0 0</pose>
+                      </sensor>
+                    </gazebo>
+
+
+                    <!-- differential drive -->
+
+                    <gazebo>
+         <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+           <commandTopic>cmd_vel</commandTopic>
+           <rosDebugLevel>Debug</rosDebugLevel>
+           <odometryTopic>odom</odometryTopic>
+           <odometryFrame>odom</odometryFrame>
+           <robotBaseFrame>base_footprint</robotBaseFrame>
+           <publishWheelTF>false</publishWheelTF>
+           <publishWheelJointState>true</publishWheelJointState>
+           <legacyMode>false</legacyMode>
+           <updateRate>60</updateRate>
+           <alwaysOn>true</alwaysOn>
+           <leftJoint>left_mWheel_to_base_link</leftJoint>
+           <rightJoint>right_mWheel_to_base_link</rightJoint>
+           <wheelSeparation>0.320</wheelSeparation>
+           <wheelDiameter>0.120</wheelDiameter>
+           <wheelAcceleration>10</wheelAcceleration>
+           <wheelTorque>1000</wheelTorque>
+         </plugin>
+        </gazebo>
+
+  <joint name="camera_front_optical_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera image
+        won't be aligned properly with the frame it is supposedly originating from -->
+    <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/>
+    <parent link="camera_front_link"/>
+    <child link="camera_front_link_optical"/>
+  </joint>
+
+  <link name="camera_front_link_optical">
+  </link>
+  
+<joint name="camera_front_optical_to_base_link" type="fixed">
+  <parent link="base_link"/>
+  <child link="camera_front_link"/>
+  <origin xyz="0.450 0 0.049815" rpy="0 0 0"/>
+</joint>
+
+<link name="camera_front_link">
+
+</link>
+
+<gazebo reference="camera_front_link">
+  <static>true</static>
+    <material>Gazebo/white</material>
+  <turnGravityOff>false</turnGravityOff>
+
+
+  <sensor type="depth" name="camera">
+    <always_on>true</always_on>
+    <update_rate>30.0</update_rate>
+
+    <camera>
+        <horizontal_fov>1.309</horizontal_fov>
+      <image>
+        <format>R8G8B8</format>
+        <width>640</width>
+        <height>480</height>
+      </image>
+     
+      <noise>base_
+        <type>gaussian</type>
+        <mean>0.0</mean>
+        <stddev>0.005</stddev>
+      </noise>
+    </camera>
+
+   <!--plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so->
+          <alwaysOn>true</alwaysOn>
+        
+          <updateRate>0.0</updateRate>
+          <cameraName>camera_front</cameraName>
+          <imageTopicName>/camera/color/front_image_raw</imageTopicName>
+          <cameraInfoTopicName>/camera/color/front_camera_info</cameraInfoTopicName>
+          <depthImageTopicName>/camera/depth/front_image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>/camera/depth/front_camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>/camera/depth/front_points</pointCloudTopicName>
+          <frameName>camera_front_link_optical</frameName>
+            <hackBaseline>0.0</hackBaseline>
+            <distortionK1>0.0</distortionK1>
+            <distortionK2>0.0</distortionK2>
+            <distortionK3>0.0</distortionK3>
+            <distortionT1>0.0</distortionT1>
+            <distortionT2>0.0</distortionT2>
+            <Cx>0.0</Cx>
+            <Cy>0.0</Cy>
+            <focalLength>0.0</focalLength>
+      </plugin-->
+  </sensor>
+</gazebo>
+
+<!--camera right-->
+
+ <joint name="camera_rear_optical_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera image
+        won't be aligned properly with the frame it is supposedly originating from -->
+    <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/>
+    <parent link="camera_rear_link"/>
+    <child link="camera_rear_link_optical"/>
+  </joint>
+
+  <link name="camera_rear_link_optical">
+  </link>
+
+
+
+<joint name="camera_rear_link_to_base_link" type="fixed">
+  <parent link="base_link"/>
+  <child link="camera_rear_link"/>
+  <origin xyz="-0.450 0 0.049815" rpy="0 0 3.14159"/>
+</joint>
+
+<link name="camera_rear_link">
+
+</link>
+
+<gazebo reference="camera_rear_link">
+  <static>true</static>
+    <material>Gazebo/white</material>
+  <turnGravityOff>false</turnGravityOff>
+
+
+  <sensor type="depth" name="camera">
+    <always_on>true</always_on>
+    <update_rate>30.0</update_rate>
+
+    <camera>
+        <horizontal_fov>1.309</horizontal_fov>
+      <image>
+        <format>R8G8B8</format>
+        <width>640</width>
+        <height>480</height>
+      </image>
+     
+      <noise>base_
+        <type>gaussian</type>
+        <mean>0.0</mean>
+        <stddev>0.005</stddev>
+      </noise>
+    </camera>
+
+   <!--plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
+          <alwaysOn>true</alwaysOn>
+         
+          <updateRate>0.0</updateRate>
+          <cameraName>camera_rear</cameraName>
+          <imageTopicName>/camera/color/rear_image_raw</imageTopicName>
+          <cameraInfoTopicName>/camera/color/rear_camera_info</cameraInfoTopicName>
+          <depthImageTopicName>/camera/depth/rear_image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>/camera/depth/rear_camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>/camera/depth/rear_points</pointCloudTopicName>
+          <frameName>camera_rear_link_optical</frameName>
+            <hackBaseline>0.0</hackBaseline>
+            <distortionK1>0.0</distortionK1>
+            <distortionK2>0.0</distortionK2>
+            <distortionK3>0.0</distortionK3>
+            <distortionT1>0.0</distortionT1>
+            <distortionT2>0.0</distortionT2>
+            <Cx>0.0</Cx>
+            <Cy>0.0</Cy>
+            <focalLength>0.0</focalLength>
+      </plugin-->
+  </sensor>
+</gazebo>
+
+
+<link name ="ultrasonic_sensorfl">
+</link>
+<joint name="ultrasonic_sensorfl_link_to_base_link" type="fixed">
+  <parent link="base_link"/>
+
+  <child link="ultrasonic_sensorfl"/>
+
+  <origin xyz=".352 .130 -0.0395" rpy ="0 0 0"/>
+</joint>
+
+<gazebo reference="ultrasonic_sensorfl">
+   <sensor type="ray" name="ultrasonic_sensorfl">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>50</update_rate>
+      <ray>
+         <scan>
+            <horizontal>
+               <samples>10</samples>
+               <resolution>1</resolution>
+               <min_angle>-0.03</min_angle>
+               <max_angle>0.03</max_angle>
+            </horizontal>
+            <vertical>
+               <samples>10</samples>
+               <resolution>1</resolution>
+               <min_angle>-0.03</min_angle>
+               <max_angle>0.03</max_angle>
+            </vertical>
+         </scan>
+         <range>
+            <min>0.01</min>
+            <max>2</max>
+            <resolution>0.02</resolution>
+         </range>
+      </ray>
+      <plugin filename="libgazebo_ros_range.so" name="gazebo_ros_range">
+         <gaussianNoise>0.005</gaussianNoise>
+         <alwaysOn>true</alwaysOn>
+         <updateRate>50</updateRate>
+         <topicName>sensor/sonar_scanfl</topicName>
+         <frameName>ultrasonic_sensorfl</frameName>
+         <radiation>INFRARED</radiation>
+         <fov>0.1</fov>
+      </plugin>
+   </sensor>
+   </gazebo>
+
+<!--fr  -->
+
+<link name ="ultrasonic_sensorfr">
+
+</link>
+<joint name="ultrasonic_sensorfr_link_to_base_link" type="fixed">
+  <parent link="base_link"/>
+
+  <child link="ultrasonic_sensorfr"/>
+
+  <origin xyz=".352 -.130 -0.0395" rpy ="0 0 0"/>
+</joint>
+
+<gazebo reference="ultrasonic_sensorfr">
+   <sensor type="ray" name="ultrasonic_sensorfr">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>50</update_rate>
+      <ray>
+         <scan>
+            <horizontal>
+               <samples>10</samples>
+               <resolution>1</resolution>
+               <min_angle>-0.03</min_angle>
+               <max_angle>0.03</max_angle>
+            </horizontal>
+            <vertical>
+               <samples>10</samples>
+               <resolution>1</resolution>
+               <min_angle>-0.03</min_angle>
+               <max_angle>0.03</max_angle>
+            </vertical>
+         </scan>
+         <range>
+            <min>0.01</min>
+            <max>2</max>
+            <resolution>0.02</resolution>
+         </range>
+      </ray>
+      <plugin filename="libgazebo_ros_range.so" name="gazebo_ros_range">
+         <gaussianNoise>0.005</gaussianNoise>
+         <alwaysOn>true</alwaysOn>
+         <updateRate>50</updateRate>
+         <topicName>sensor/sonar_scanfr</topicName>
+         <frameName>ultrasonic_sensorfr</frameName>
+         <radiation>INFRARED</radiation>
+         <fov>0.1</fov>
+      </plugin>
+   </sensor>
+   </gazebo>
+
+<!-- br -->
+
+
+<link name ="ultrasonic_sensorbr">
+
+</link>
+<joint name="ultrasonic_sensorbr_link_to_base_link" type="fixed">
+  <parent link="base_link"/>
+
+  <child link="ultrasonic_sensorbr"/>
+
+  <origin xyz="-.352 -.130 -0.0395" rpy ="0 0 3.14"/>
+</joint>
+
+<gazebo reference="ultrasonic_sensorbr">
+   <sensor type="ray" name="ultrasonic_sensorbr">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>50</update_rate>
+      <ray>
+         <scan>
+            <horizontal>
+               <samples>10</samples>
+               <resolution>1</resolution>
+               <min_angle>-0.03</min_angle>
+               <max_angle>0.03</max_angle>
+            </horizontal>
+            <vertical>
+               <samples>10</samples>
+               <resolution>1</resolution>
+               <min_angle>-0.03</min_angle>
+               <max_angle>0.03</max_angle>
+            </vertical>
+         </scan>
+         <range>
+            <min>0.01</min>
+            <max>2</max>
+            <resolution>0.02</resolution>
+         </range>
+      </ray>
+      <plugin filename="libgazebo_ros_range.so" name="gazebo_ros_range">
+         <gaussianNoise>0.005</gaussianNoise>
+         <alwaysOn>true</alwaysOn>
+         <updateRate>50</updateRate>
+         <topicName>sensor/sonar_scanbr</topicName>
+         <frameName>ultrasonic_sensorbr</frameName>
+         <radiation>INFRARED</radiation>
+         <fov>0.1</fov>
+      </plugin>
+   </sensor>
+   </gazebo>
+
+<!--bl  -->
+<link name ="ultrasonic_sensorbl">
+
+</link>
+<joint name="ultrasonic_sensorbl_link_to_base_link" type="fixed">
+  <parent link="base_link"/>
+
+  <child link="ultrasonic_sensorbl"/>
+
+  <origin xyz="-.352 .130 -0.0395" rpy ="0 0 3.14"/>
+</joint>
+
+<gazebo reference="ultrasonic_sensorbl">
+   <sensor type="ray" name="ultrasonic_sensorbl">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>50</update_rate>
+      <ray>
+         <scan>
+            <horizontal>
+               <samples>10</samples>
+               <resolution>1</resolution>
+               <min_angle>-0.03</min_angle>
+               <max_angle>0.03</max_angle>
+            </horizontal>
+            <vertical>
+               <samples>10</samples>
+               <resolution>1</resolution>
+               <min_angle>-0.03</min_angle>
+               <max_angle>0.03</max_angle>
+            </vertical>
+         </scan>
+         <range>
+            <min>0.01</min>
+            <max>2</max>
+            <resolution>0.02</resolution>
+         </range>
+      </ray>
+      <plugin filename="libgazebo_ros_range.so" name="gazebo_ros_range">
+         <gaussianNoise>0.005</gaussianNoise>
+         <alwaysOn>true</alwaysOn>
+         <updateRate>50</updateRate>
+         <topicName>sensor/sonar_scanbl</topicName>
+         <frameName>ultrasonic_sensorbl</frameName>
+         <radiation>INFRARED</radiation>
+         <fov>0.1</fov>
+      </plugin>
+   </sensor>
+   </gazebo>
+<!--  -->
+</robot>

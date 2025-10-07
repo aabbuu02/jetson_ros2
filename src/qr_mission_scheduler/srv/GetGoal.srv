@@ -1,0 +1,4 @@
+int32[] current_pos
+---
+string unique_id
+int32[] goal_pos

@@ -1,0 +1,4 @@
+bool pause_feedback
+---
+bool status
+

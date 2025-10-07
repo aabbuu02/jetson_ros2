@@ -1,0 +1,10 @@
+#goal definition
+ACRControl control_input
+
+---
+#result definition
+bool is_success
+
+---
+#feedback
+bool feedback

@@ -1,0 +1,4 @@
+graph_creator_msgs/EdgeCreationType type
+---
+bool success
+string message

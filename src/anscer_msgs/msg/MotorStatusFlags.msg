@@ -1,0 +1,9 @@
+bool serial_mode
+bool pulse_mode
+bool analog_mode
+bool power_stage_off
+bool stall_detected
+bool at_limit
+bool unused
+bool micro_basic_script_running
+bool motor_tuning_mode

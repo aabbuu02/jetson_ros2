@@ -1,0 +1,10 @@
+#goal definition
+anscer_msgs/ChargeInfo charge_info
+---
+#result definition
+bool is_success
+
+---
+#feedback
+int8 charge_feedback
+int32 time_elapsed

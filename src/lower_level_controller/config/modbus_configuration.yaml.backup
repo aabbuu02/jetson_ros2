@@ -1,0 +1,26 @@
+modbus_read:
+ left_motor_speed: 5
+ right_motor_speed: 6
+ left_motor_encoder: 0
+ right_motor_encoder: 2
+ battery_voltage: 4
+ battery_percentage: 18
+ mode_selection: 10
+ confirmation_button: 11
+ emergency_feedback: 12
+
+ barcode_tag: 17
+ barcode_x: 18
+ barcode_y: 20 
+ barcode_theta: 22
+
+modbus_write:
+ left_motor_command: 40        #Register index with left motor feedback
+ right_motor_command: 41
+ led_command: 43
+ buzzer_command: 45
+ controller_mode: 54
+
+
+ip_address: 192.168.1.5
+port: 502

@@ -1,0 +1,6 @@
+<launch>
+  <!-- Lower Level Controller -->
+  <node pkg="emergency_handler" type="emergency_handler"  name="emergency_handler" output="screen">
+  </node>
+</launch>
+

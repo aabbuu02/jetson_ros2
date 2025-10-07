@@ -1,0 +1,17 @@
+#goal definition
+string source_location
+string source_process
+string destination_location
+string destination_process
+string default_location
+---
+#result definition
+bool goal_succeeded
+string status
+---
+#feedback
+int16 completed
+anscer_msgs/MissionInfo mission_status
+string status
+bool warning
+string warning_msg

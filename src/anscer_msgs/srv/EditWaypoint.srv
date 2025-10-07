@@ -1,0 +1,13 @@
+bool rename
+bool replace_id
+bool replace_to_current_pose
+bool replace_to_pose
+int16 waypoint_order
+string waypoint_id
+string new_id
+string waypoint_type
+string waypoint_name
+geometry_msgs/PoseStamped waypoint_pose
+---
+string status
+bool edited

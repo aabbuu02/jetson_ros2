@@ -1,0 +1,4 @@
+graph_creator_msgs/SnapPoseConfig snap_pose_config
+---
+bool success
+string message

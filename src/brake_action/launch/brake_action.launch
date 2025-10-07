@@ -1,0 +1,5 @@
+<launch>
+  <rosparam command="load" file="$(find brake_action)/config/HigherLevelInterface.yaml"/>
+  <rosparam command="load" file="$(find brake_action)/config/ModbusCommunicator.yaml"/>
+  <node pkg="brake_action" type="brake_action_node" name="brake_activator" output="screen"/>
+</launch>

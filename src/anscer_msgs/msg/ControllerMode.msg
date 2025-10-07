@@ -1,0 +1,5 @@
+uint8 DEFAULT_MOTION=0
+uint8 CHARGE_DOCK=1
+uint8 CHARGE_UNDOCK=2
+uint8 BARCODE_MOTION=3
+int8 controller_mode

@@ -1,0 +1,9 @@
+<launch>
+    
+    <arg name="output_to" default="screen" doc="Output to screen or log"/>
+
+    <node name="tag_monitor" pkg="tag_monitor" type="tag_monitor_node" output="$(arg output_to)">
+        <rosparam file="$(find tag_monitor)/config/tag_monitor.yaml" command="load"/>
+    </node>
+
+</launch>

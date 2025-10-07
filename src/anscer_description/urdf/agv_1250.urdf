@@ -1,0 +1,36 @@
+<?xml version ="1.0"?>
+<robot name="anscer_amr">
+
+
+
+<!--base link -->
+<link name="base_footprint">
+</link>
+<link name="base_link"></link>
+
+<joint name="base_footprint_to_base_link" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.10" rpy="0 0 0"/>
+  </joint>
+
+<link name="lidar_link_front">
+</link>
+<joint name="lidar_front_to_base_link" type="fixed">
+<parent link="base_link"/>
+<child link="lidar_link_front"/>
+ <origin xyz="0.83 -0.40 0.1" rpy="0 0 -0.78"/>
+
+</joint>
+
+
+<link name="lidar_link_rear">
+</link>
+<joint name="lidar_rear_to_base_link" type="fixed">
+<parent link="base_link"/>
+<child link="lidar_link_rear"/>
+ <origin xyz="-0.83 0.40 0.1" rpy="0 0 2.35"/>
+</joint>
+
+
+</robot>

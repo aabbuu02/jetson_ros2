@@ -1,0 +1,31 @@
+modbus_read:
+ time_stamp_current: 0      
+ left_motor_speed: 2
+ right_motor_speed: 3
+ left_motor_encoder: 6
+ right_motor_encoder: 4
+ battery_voltage: 9
+ battery_percentage: 10
+ power_off: 16  #15 
+ mission_feedback: 17
+ buffer_feedback: 67
+ bot_shelfno: 67
+
+modbus_write:
+ time_stamp_update: 100
+ left_motor_command: 102        #Register index with left motor feedback
+ right_motor_command: 103
+ buzzer_command: 107
+ pick_location: 115
+
+ pick_orientation: 114
+ drop_location: 117
+ drop_orientation: 116
+ mission_confirmation: 141 #105
+ tast_command: 142 #pick or drop pin
+ brake_command: 144
+ charge_pin: 145
+ip_address: 192.168.1.125
+port: 502
+
+

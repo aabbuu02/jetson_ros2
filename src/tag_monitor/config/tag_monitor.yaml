@@ -1,0 +1,11 @@
+tag_monitor:
+  ros__parameters:
+    # Tag monitoring required topics
+    odom_topic: "odom"
+    initialize_robot_topic: "robot_initialized"
+    deinitialize_robot_topic: "robot_initialized"
+    tag_detection_topic: "barcode/local"
+    emergency_stop_topic: "e_stop/tag_detection"
+    
+    initialize_on_tag_detection: false   # Use tag detection as initialization of the robot
+    max_detection_distance: 1.2          # Maximum distance the robot is allowed to travel with detecting a tag

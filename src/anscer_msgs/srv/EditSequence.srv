@@ -1,0 +1,6 @@
+bool save
+string waypoint_id
+string sequence_list
+---
+bool is_saved
+string status

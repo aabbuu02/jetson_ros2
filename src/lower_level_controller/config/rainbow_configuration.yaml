@@ -1,0 +1,4 @@
+rainbow:
+ baud_rate: 115200
+ left_motor: /dev/lft_motor
+ right_motor: /dev/rgt_motor     

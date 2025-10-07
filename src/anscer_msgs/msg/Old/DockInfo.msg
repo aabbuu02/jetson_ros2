@@ -1,0 +1,10 @@
+uint8 FIDUCIALDOCKING=1
+uint8 REFLECTORDOCKING=2
+uint8 TROLLEYDOCKING=3
+uint8 ICPDOCKING=4
+
+uint8 DOCKSTATE=1
+uint8 UNDOCKSTATE=2
+
+int8 dock_marker
+int8 dock_mode

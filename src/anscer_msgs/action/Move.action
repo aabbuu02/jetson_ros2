@@ -1,0 +1,9 @@
+#goal definition
+int32 source_id
+int32 target_id
+---
+#result definition
+bool is_success
+---
+#feedback
+bool move_feedback

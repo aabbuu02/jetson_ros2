@@ -1,0 +1,7 @@
+HigherLevelInterface:
+  update_rate: 6                             
+  publisherTopic : "/lifterFeedback"                         
+  subscriberTopic : "/lift_action"                         
+  numberOfReadRegisters : 10
+  triggerFailureThreshold : 20
+  tasksFileName : "/home/jishnu/ANSCER_ws/src/plc_communicator/tasks/tasks.txt"                    

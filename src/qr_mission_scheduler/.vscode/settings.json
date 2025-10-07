@@ -1,0 +1,7 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/ribin/Workspace/anscer_qr/devel/lib/python3/dist-packages",
+        "/home/ribin/Workspace/anscer_ws/anscer_qr/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ]
+}

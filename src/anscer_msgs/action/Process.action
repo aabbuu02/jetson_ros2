@@ -1,0 +1,9 @@
+#goal definition
+int8 system_activate
+---
+#result definition
+bool is_success
+
+---
+#feedback
+bool system_feedback

@@ -1,0 +1,29 @@
+controller_type: 1              # 1 - Roboteq alone  
+
+robot:
+ wheel_seperation: 0.90        #Width of the robot base in meters
+ wheel_radius: 0.101           #Radius of robot wheel in meters
+ TPR: 16384                    #Ticks per rotation 4096*4*9   
+                               
+ linear_vel_limit: 3.0          #Linear velocity limit in m/s
+ angular_vel_limit: 1.0         #Angular velocity limit in rad/s
+ gearRatio: 9                   #gear ratio used on motor transmission.
+
+ 
+odom_frame: odom_frame          #Odometry frame of the system
+base_frame: base_footprint      #Robot base frame for odom  publishing
+cmd_topic: cmd_vel
+odom_topic: odom
+barcode_global_topic: barcode/global
+emergency_stop_topic: e_stop
+battery_topic: bms_data/battery_state
+debug_cmd_topic: debug/cmd_vel
+
+
+
+
+cmd_vel_timeout: 0.5           #Command velocity reset timeout in seconds
+
+publish_tf: true                #Publishes odom tf 
+
+roboteq_port: /dev/roboteq

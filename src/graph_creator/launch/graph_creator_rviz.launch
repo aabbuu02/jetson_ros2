@@ -1,0 +1,11 @@
+<launch>
+
+    <arg name="rviz_required" default="true" doc="Whether other lauches should also be killed along with RViz"/>
+    <arg name="output_to" default="screen" doc="Output to screen or log"/>
+
+    <node name="graph_creator_rviz" pkg="rviz" type="rviz" output="$(arg output_to)"
+          args="-d $(find graph_creator)/rviz/graph_creator.rviz" required="$(arg rviz_required)">
+        <remap from="/move_base_simple/goal" to="add_vertex_pose"/>
+    </node>
+
+</launch>

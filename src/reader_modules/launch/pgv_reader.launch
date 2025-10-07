@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="reader_modules" type="pgv_reader" respawn="false" name="pgv_reader" output="screen">
+    <rosparam command="load" file="$(find reader_modules)/config/pgv_reader.yaml"/>
+  </node>
+
+</launch>

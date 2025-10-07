@@ -1,0 +1,22 @@
+topics:
+- name    : navigation
+  topic   : navigation/cmd_vel
+  timeout : 0.5
+  priority: 1
+- name    : dock
+  topic   : docking/cmd_vel
+  timeout : 0.5
+  priority: 10
+- name    : line_follower
+  topic   : line_follower/cmd_vel
+  timeout : 0.5
+  priority: 20
+- name    : joy
+  topic   : joy/cmd_vel
+  timeout : 0.5
+  priority: 50
+locks:
+- name    : e_stop
+  topic   : e_stop
+  timeout : 0.0
+  priority: 255

@@ -1,0 +1,7 @@
+<launch>
+
+    <arg name="map_yaml_file" default="$(find graph_creator)/maps/willow_garage.yaml" doc="Map's YAML file"/>
+
+    <node name="graph_creator_map_server" pkg="map_server" type="map_server" args=" $(arg map_yaml_file)"/> 
+
+</launch>

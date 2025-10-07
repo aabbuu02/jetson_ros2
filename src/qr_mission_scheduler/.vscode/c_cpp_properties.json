@@ -1,0 +1,40 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/ribin/Workspace/anscer_qr/devel/include/**",
+        "/home/ribin/Workspace/anscer_ws/anscer_qr/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/anscer_sensors/anscer_indication/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/anscer_sensors/cognex_dataman/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/anscer_sensors/current_sensor/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/path_graph/global_path_graph/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/path_graph/global_path_graph_planner/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/path_graph/graph_control/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/path_graph/graph_creator/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/path_graph/graph_server/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/path_graph/graph_visual_control/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/anscer_sensors/imu/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/anscer_sensors/led_controller/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/lift_action/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/lower_level_controller/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/qr_mission_scheduler/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/qr_navigation/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/safety_layer/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/anscer_sensors/static_lidar/include/**",
+        "/home/ribin/Workspace/anscer_qr/src/anscer_agv/wms_data/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

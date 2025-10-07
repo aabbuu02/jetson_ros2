@@ -1,0 +1,4 @@
+float32 left_rpm_command
+float32 right_rpm_command
+float32 left_rpm_feedback
+float32 right_rpm_feedback

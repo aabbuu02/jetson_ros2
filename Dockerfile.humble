@@ -1,0 +1,20 @@
+# 1. Start with the official ROS 2 Humble base image.
+FROM ros:humble-ros-base
+
+# 2. Install common system tools and libraries we know we will need.
+# We add colcon-common-extensions for building and libmodbus-dev for hardware.
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3-pip \
+    git \
+    vim \
+    curl \
+    libmodbus-dev \
+    ros-humble-teleop-twist-keyboard \
+    python3-colcon-common-extensions && \
+    rm -rf /var/lib/apt/lists/*
+
+# 3. Set up the entrypoint to source ROS 2 automatically.
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+CMD ["bash"]
+

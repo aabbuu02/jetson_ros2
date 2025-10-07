@@ -1,0 +1,3 @@
+string name
+MotorFaultFlags fault_flags
+MotorStatusFlags status_flags

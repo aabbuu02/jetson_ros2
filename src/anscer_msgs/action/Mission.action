@@ -1,0 +1,12 @@
+#goal definition
+int16 loop_number
+string mission_id
+anscer_msgs/Task[] mission_list
+
+---
+#result definition
+bool is_success
+string mission_id
+---
+#feedback
+anscer_msgs/Feedback mission_feedback

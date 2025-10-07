@@ -1,0 +1,6 @@
+graph_creator_msgs/GraphCreatorMode graph_creator_mode
+graph_creator_msgs/EdgeCreationType edge_creation_type
+graph_creator_msgs/EdgeDirectionCreationType edge_direction_creation_type
+graph_creator_msgs/SnapPoseConfig snap_pose_config
+bool all_vertices_locked
+bool all_edges_locked

@@ -1,0 +1,4 @@
+bool delete_current_set
+bool delete_all
+---
+bool result

@@ -1,0 +1,8 @@
+bool save
+string type
+string station_name
+---
+bool is_saved
+string name_exist
+string status
+

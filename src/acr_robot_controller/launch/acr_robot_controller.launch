@@ -1,0 +1,7 @@
+<launch>
+  <!-- Lower Level Controller -->
+
+  <node pkg="acr_robot_controller" type="acr_robot_controller" respawn="false" name="acr_robot_controller" output="screen">
+    <rosparam command="load" file="$(find acr_robot_controller)/config/acr_robot_controller.yaml"/>
+  </node>
+</launch>
