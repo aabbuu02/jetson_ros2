@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+  <launch>
+	<!--Parameters-->
+    <param name="robot_description" textfile="$(find anscer_description)/urdf/anscer_amr_qr.urdf"/>
+
+
+	<!--Include-->
+    <!--include file="$(find gazebo_ros)/launch/empty_world.launch"/-->
+   <!-- <include file="$(find depthimage_to_laserscan)/launch/depthimage_to_laserscan.launch"/>-->
+    <!--<include file="$(find laser_filter)/launch/laser_filters.launch"/>-->
+	<!--Arguments-->
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="recording" value="false"/>
+    <arg name="debug" value="false"/>
+	<!--Spawn robot-->
+    <!--node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x -1.68 -y -1.1 -z .4 -model anscer" output="screen"/-->
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+</launch>

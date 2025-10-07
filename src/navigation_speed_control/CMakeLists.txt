@@ -1,31 +1,71 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 2.8.3)
 project(navigation_speed_control)
 
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(nav_msgs REQUIRED)
+add_compile_options(-std=c++11)
 
-add_executable(navigation_speed_control_node src/navigation_speed_control.cpp)
 
-ament_target_dependencies(navigation_speed_control_node
-  rclcpp
+find_package(catkin REQUIRED COMPONENTS
+  
+  roscpp
+  rospy
+  std_msgs
+  anscer_msgs
+  roslib
   geometry_msgs
-  nav_msgs
+  dynamic_reconfigure
+
+  
+
 )
 
-target_include_directories(navigation_speed_control_node PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+
+
+
+
+
+
+
+
+
+catkin_package(
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS
+    
+    roscpp
+    rospy
+    std_msgs
+    anscer_msgs
+    geometry_msgs
+    dynamic_reconfigure
+)
+###########
+## Build ##
+###########
+
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+  ${PROJECT_SOURCE_DIR}/include/navigation_speed_control
 )
 
-install(TARGETS
-  navigation_speed_control_node
-  DESTINATION lib/${PROJECT_NAME}
+
+add_executable(navigation_speed_control
+  src/navigation_speed_control.cpp
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME}/)
-install(DIRECTORY config/ DESTINATION share/${PROJECT_NAME}/)
+target_link_libraries(navigation_speed_control
+  ${catkin_LIBRARIES} 
+)
 
-ament_package()
+
+## Mark executables for installation
+
+install(TARGETS navigation_speed_control 
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
+
+
+## Mark other files for installation (e.g. launch and bag files, etc.)
+install(DIRECTORY include launch config
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+   PATTERN ".svn" EXCLUDE
+ )

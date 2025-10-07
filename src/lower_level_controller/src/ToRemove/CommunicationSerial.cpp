@@ -1,10 +1,3 @@
-/**
- * @file CommunicationSerial.cpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #include "CommunicationSerial.h"
 
 CommunicationSerial::CommunicationSerial(std::string serial_number, int speed)

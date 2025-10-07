@@ -1,40 +1,53 @@
-/**
- * @file RoboteqDevice.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
+#ifndef __RoboteqDevice_H_
+#define __RoboteqDevice_H_
+#include "ros/console.h"
+#include "Constants.h"
+#include "ErrorCodes.h"
 
-#ifndef ROBOTEQDEVICE_H
-#define ROBOTEQDEVICE_H
+using namespace std;
 
-#include <iostream>
-#include <string>
+string ReplaceString(string source, string find, string replacement);
+void sleepms(int milliseconds);
 
-// This includes the helper files we copied
-#include "acr_robot_controller/ErrorCodes.h"
-#include "acr_robot_controller/Constants.h"
 
 class RoboteqDevice
 {
-public:
-	RoboteqDevice();
-	~RoboteqDevice();
+private:
+	int device_fd;
+	int fd0;
+	int handle;
 
-	int Connect(std::string port);
+protected:
+	void InitPort();
+
+	int Write(string str);
+	int ReadAll(string &str);
+
+	int IssueCommand(string commandType, string command, string args, int waitms, string &response, bool isplusminus = false);
+	int IssueCommand(string commandType, string command, int waitms, string &response, bool isplusminus = false);
+
+public:
+	bool IsConnected();
+	int Connect(string port);
 	void Disconnect();
 
-	int SetCommand(int command, int value);
-	int SetCommand(int command, int index, int value);
-	
-	int GetValue(int query, int index, int &value);
-	int GetValue(int query, int &value);
+	void connectToDevice(const string &device);
 
-private:
-	int fd;
-	int write_port(const std::string &str);
-	int read_port(std::string &response);
+	int SetConfig(int configItem, int index, int value);
+	int SetConfig(int configItem, int value);
+
+	int SetCommand(int commandItem, int index, int value);
+	int SetCommand(int commandItem, int value);
+	int SetCommand(int commandItem);
+
+	int GetConfig(int configItem, int index, int &result);
+	int GetConfig(int configItem, int &result);
+
+	int GetValue(int operatingItem, int index, int &result);
+	int GetValue(int operatingItem, int &result);
+
+	RoboteqDevice();
+	~RoboteqDevice();
 };
+
 #endif
-
-

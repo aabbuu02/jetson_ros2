@@ -1,10 +1,3 @@
-/**
- * @file LowerLevelInterface.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #ifndef LOWER_LEVEL_INTERFACE_H
 #define LOWER_LEVEL_INTERFACE_H
 

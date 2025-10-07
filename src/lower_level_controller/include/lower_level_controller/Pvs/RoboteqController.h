@@ -1,10 +1,3 @@
-/**
- * @file RoboteqController.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #ifndef ROBOTEQCONTROLLER_H
 #define ROBOTEQCONTROLLER_H
 

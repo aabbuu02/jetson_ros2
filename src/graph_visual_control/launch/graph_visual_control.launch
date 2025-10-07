@@ -1,0 +1,7 @@
+<launch>
+
+    <arg name="output_to" default="screen" doc="Output to either screen or log"/>
+
+    <node name="graph_visual_control" pkg="graph_visual_control" type="graph_viz_ctrl" output="$(arg output_to)"/>
+
+</launch>

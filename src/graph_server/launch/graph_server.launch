@@ -1,0 +1,16 @@
+<launch>
+
+    <arg name="graph_file" default="$(find graph_server)/graphs/arapl_v6.graphml" doc="The graph file to load at startup"/>
+    <arg name="use_visual_control" default="true" doc="Whether to use the graph visual control"/>
+    <arg name="output_to" default="screen" doc="Output to screen or log"/>
+
+    <node name="graph_server" pkg="graph_server" type="graph_server" output="$(arg output_to)" 
+          args="$(arg graph_file)"/>
+
+    <group if="$(arg use_visual_control)">
+        <include file="$(find graph_visual_control)/launch/graph_visual_control.launch">
+            <arg name="output_to" value="$(arg output_to)"/>
+        </include>
+    </group>
+
+</launch>

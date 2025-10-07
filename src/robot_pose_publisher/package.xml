@@ -1,20 +1,25 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w.org/2001/XMLSchema"?>
-<package format="3">
+<package>
   <name>robot_pose_publisher</name>
-  <version>2.1.0</version>
-  <description>Publish the robot's pose as a PoseStamped message</description>
-  <maintainer email="abubakarsiddiq@todo.todo">abubakarsiddiq</maintainer>
+  <version>0.2.4</version>
+  <description>A Simple Node to Publish the Robot's Position Relative to the Map using TFs</description>
+
+  <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
+  <author email="rctoris@wpi.edu">Russell Toris</author>
+
   <license>BSD</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <url type="website">http://ros.org/wiki/robot_pose_publisher</url>
+  <url type="bugtracker">https://github.com/GT-RAIL/robot_pose_publisher/issues</url>
+  <url type="repository">https://github.com/GT-RAIL/robot_pose_publisher</url>
 
-  <depend>rclcpp</depend>
-  <depend>tf2</depend>
-  <depend>tf2_ros</depend>
-  <depend>geometry_msgs</depend>
+  <buildtool_depend>catkin</buildtool_depend>
 
-  <export>
-    <build_type>ament_cmake</build_type>
-  </export>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>tf</build_depend>
+
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>tf</run_depend>
 </package>

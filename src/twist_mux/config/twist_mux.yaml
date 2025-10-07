@@ -1,22 +1,32 @@
+# Twist Mux Configuration for Zeus Robot
+# This configuration multiplexes different velocity command sources
+
+# List of topics to multiplex
 topics:
-- name    : navigation
-  topic   : navigation/cmd_vel
-  timeout : 0.5
-  priority: 1
-- name    : dock
-  topic   : docking/cmd_vel
-  timeout : 0.5
-  priority: 10
-- name    : line_follower
-  topic   : line_follower/cmd_vel
-  timeout : 0.5
-  priority: 20
-- name    : joy
-  topic   : joy/cmd_vel
-  timeout : 0.5
-  priority: 50
+  - name    : "cmd_vel"
+    topic   : "/cmd_vel"
+    timeout : 0.5
+    priority: 10
+    type    : "geometry_msgs/msg/Twist"
+
+  - name    : "emergency_cmd_vel"
+    topic   : "/emergency_cmd_vel"
+    timeout : 0.5
+    priority: 100
+    type    : "geometry_msgs/msg/Twist"
+
+  - name    : "joy_cmd_vel"
+    topic   : "/joy/cmd_vel"
+    timeout : 0.5
+    priority: 5
+    type    : "geometry_msgs/msg/Twist"
+
+# Output topic
+cmd_out: "/cmd_vel_out"
+
+# Lock topics (emergency stops)
 locks:
-- name    : e_stop
-  topic   : e_stop
-  timeout : 0.0
-  priority: 255
+  - name    : "e_stop"
+    topic   : "/e_stop"
+    timeout : 0.5
+    type    : "std_msgs/msg/Bool"

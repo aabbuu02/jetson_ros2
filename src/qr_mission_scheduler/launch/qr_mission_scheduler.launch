@@ -1,0 +1,7 @@
+<launch>
+  <!-- safety_layer -->
+  <node pkg="qr_mission_scheduler" type="qr_mission_scheduler_client" respawn="false" name="mission_client" output="screen">
+  <rosparam command="load" file="$(find qr_mission_scheduler)/config/data.yaml"/>
+  </node>
+</launch>
+

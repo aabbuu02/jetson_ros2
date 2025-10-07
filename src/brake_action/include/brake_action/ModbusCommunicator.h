@@ -1,31 +1,51 @@
 /**
- * @file ModbusCommunicator.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
+ * @file PlcCommunicator
+ * @author Jishnu (jishnu@anscer.com)
+ * @brief communication node used for communicating between two PLC s
+ *
+ * @version 0.1
+ * @date 2022-07-23
+ * 
+ * @copyright Copyright (c) 2022
+ * 
  */
+/**
+ * @brief include headerfiles
+ */
+ 
+#ifndef MODBUS_COMMUNICATOR
+#define MODBUS_COMMUNICATOR
 
-#ifndef MODBUS_COMMUNICATOR_H
-#define MODBUS_COMMUNICATOR_H
-
-#include <string>
+#include "ros/ros.h"
 #include <modbus/modbus.h>
+#include "iostream"
+#include <stdlib.h>
+#include <errno.h>
 
-// This is now a pure C++ class with no ROS dependencies.
 class ModbusCommunicator
 {
-public:
-    ModbusCommunicator();
-    ~ModbusCommunicator();
-    
-    // Initialize connection with parameters passed from the ROS 2 node.
-    int initiateConnection(const std::string& ip, int port);
-    int writeData(int address, int value);
+    public:
 
-private:
-    modbus_t* m_modbus_context;
+     ModbusCommunicator();
+     ~ModbusCommunicator();
+
+     ros::NodeHandle nh;
+
+     int writeDataToRegister(int registorNumber,uint32_t data);
+
+    private:
+     bool checkParameters();
+     int readParameters();
+     int initiateConnection();
+
+     const char* m_ip;
+     std::string m_ipAddress;
+     int m_port;
+;
+     uint16_t m_writeData;
+     modbus_t *p_ptx;  //object for modbus
+     bool m_parameterExistanceFlag;
+
+     
 };
-
-#endif // MODBUS_COMMUNICATOR_H
-
-
+#endif

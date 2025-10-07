@@ -1,5 +1,5 @@
 std_msgs/Header header
-graph_msgs/Node[] vertices
-graph_msgs/Edge[] edges
-graph_msgs/GraphMetaData meta_data
-
+GraphMetaData meta_data
+Vertex[] vertices       # List of vertices
+Edge[] edges            # List of edges
+Property[] properties 

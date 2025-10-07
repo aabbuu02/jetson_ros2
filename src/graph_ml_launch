@@ -1,0 +1,9 @@
+roslaunch graph_server graph_server.launch graph_file:=`rospack find graph_server`/config/qr_map.graphml
+roslaunch graph_creator graph_creator.launch use_rviz:=true 
+ rosrun global_path_graph_planner path_graph_planner_node
+rosservice call /make_graph_plan "source_id: 2 target_id: 12
+
+rosservice call /graph_creator/save_graph "graph_file_name: 'arapl_test'
+save_graph_url: ''" 
+
+

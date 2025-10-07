@@ -1,10 +1,3 @@
-/**
- * @file RoboteqDevice.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #ifndef __RoboteqDevice_H_
 #define __RoboteqDevice_H_
 

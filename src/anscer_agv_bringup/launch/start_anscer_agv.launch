@@ -1,0 +1,25 @@
+<launch>
+
+  <include file="$(find lower_level_controller)/launch/lower_level_controller.launch"/>
+  <include file="$(find reader_modules)/launch/pgv_reader.launch"/>
+  <include file="$(find twist_mux)/launch/twist_mux.launch"/>
+  <include file="$(find anscer_description)/launch/anscer_description.launch"/>
+   
+  <include file="$(find graph_server)/launch/graph_server.launch">
+    <arg name="graph_file" value="$(find graph_server)/graphs/default.graphml"/>
+  </include>
+  
+  <node pkg="global_path_graph_planner" type ="path_graph_planner_node" name="global_planner"/>
+  <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_pose_publisher"/>
+  <node pkg="qr_mission_scheduler" type="qr_mission_scheduler_server" name="mission_server"/>
+  <node pkg="qr_navigation" type="qr_navigation_node" name="qr_navigation_node"/>
+   <include file="$(find qr_mission_scheduler)/launch/qr_mission_scheduler.launch"/>
+  <node pkg="wms_data" type="sql1.py" name="wms"/>
+   
+  <include file="$(find tag_monitor)/launch/tag_monitor.launch"/>
+  <!--include file="$(find emergency_handler)/launch/emergency_handler.launch"/-->
+
+  <include file="$(find power_control)/launch/power_control.launch"/>
+
+  
+</launch>

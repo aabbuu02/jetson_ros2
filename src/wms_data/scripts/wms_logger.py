@@ -1,10 +1,3 @@
-"""
-@file wms_logger.py
-@author Abubakarsiddiq Navid shaikh
-@date 2024-10-05
-@brief Auto-generated author information
-"""
-
 #!/usr/bin/python
 import rospy
 from std_msgs.msg import Bool

@@ -1,10 +1,3 @@
-/**
- * @file graph_colors.hpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #pragma once
 
 #include <std_msgs/ColorRGBA.h>

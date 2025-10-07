@@ -1,43 +1,76 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 2.8.3)
 project(acr_robot_controller)
 
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(nav_msgs REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(anscer_msgs REQUIRED)
-find_package(tf2_ros REQUIRED)
-find_package(tf2_geometry_msgs REQUIRED)
+add_compile_options(-std=c++11)
+add_definitions(-Dlinux)
 
-# Build a single executable from our one, self-contained source file.
-add_executable(acr_robot_controller_node src/acr_robot_controller_node.cpp)
 
-# Add dependencies on other ROS 2 packages
-ament_target_dependencies(acr_robot_controller_node
-  rclcpp
-  std_msgs
+find_package(catkin REQUIRED COMPONENTS
+  
   geometry_msgs
-  nav_msgs
-  sensor_msgs
+  roscpp
+  rospy
+  std_msgs
+  roslib
+  tf
+  dynamic_reconfigure
   anscer_msgs
-  tf2_ros
-  tf2_geometry_msgs
+  actionlib 
 )
 
-# Install the final executable
-install(TARGETS
-  acr_robot_controller_node
-  DESTINATION lib/${PROJECT_NAME}
+
+catkin_package(
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS
+    sensor_msgs 
+    geometry_msgs
+    roscpp
+    rospy
+    std_msgs
+    actionlib
 )
 
-# Install other necessary files
-install(
-  DIRECTORY launch config udev
-  DESTINATION share/${PROJECT_NAME}
+
+###########
+## Build ##
+###########
+
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+  ${PROJECT_SOURCE_DIR}/include/acr_robot_controller
+)
+#set(CMAKE_CXX_STANDARD_LIBRARIES -ludev)
+
+add_executable(acr_robot_controller
+  src/LowerLevelInterface.cpp
+  src/LowerLevelComputations.cpp
+  src/RosClass.cpp
+
+
+  src/RoboteqController.cpp
+  src/RoboteqDevice.cpp
+
 )
 
-ament_package()
+target_link_libraries(acr_robot_controller
+  ${catkin_LIBRARIES}
+  modbus
+)
 
 
+
+## Mark other files for installation (e.g. launch and bag files, etc.)
+
+
+
+
+install(TARGETS acr_robot_controller
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
+
+
+## Mark other files for installation (e.g. launch and bag files, etc.)
+install(DIRECTORY include launch config
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+   PATTERN ".svn" EXCLUDE
+ )

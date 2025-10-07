@@ -2,7 +2,7 @@
 bool aruco_charging
 bool reflector_charging
 bool general_docking
-bool vlmarker_charging
+bool VLMarker_charging
 
 bool start_dock
 bool start_undock

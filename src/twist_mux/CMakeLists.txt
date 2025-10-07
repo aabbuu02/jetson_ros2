@@ -1,33 +1,57 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.0.2)
 project(twist_mux)
 
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(std_msgs REQUIRED)
+find_package(catkin REQUIRED
+    COMPONENTS
+      roscpp
+      std_msgs
+      geometry_msgs
+      visualization_msgs
+      diagnostic_updater)
 
-add_executable(twist_mux_node src/twist_mux.cpp)
+find_package(Boost REQUIRED)
 
-target_include_directories(twist_mux_node PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+
+catkin_package(
+    INCLUDE_DIRS include
+    CATKIN_DEPENDS
+      roscpp
+      std_msgs
+      geometry_msgs
+      visualization_msgs
+      diagnostic_updater)
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+
+add_executable(twist_mux
+    src/twist_mux.cpp
+    src/twist_mux_node.cpp
+    src/twist_mux_diagnostics.cpp)
+target_link_libraries(twist_mux ${catkin_LIBRARIES})
+
+add_executable(twist_marker
+    src/twist_marker.cpp)
+target_link_libraries(twist_marker ${catkin_LIBRARIES})
+
+install(TARGETS twist_mux twist_marker
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(PROGRAMS scripts/joystick_relay.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+foreach(dir launch config)
+    install(DIRECTORY ${dir}/
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
+endforeach()
+
+install(DIRECTORY include/
+   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+   FILES_MATCHING PATTERN "*.h"
 )
 
-ament_target_dependencies(twist_mux_node
-  rclcpp
-  geometry_msgs
-  std_msgs
-)
+if (CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
 
-install(TARGETS
-  twist_mux_node
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(
-  DIRECTORY launch config
-  DESTINATION share/${PROJECT_NAME}
-)
-
-ament_package()
-
+    add_rostest(test/system.test)
+endif()

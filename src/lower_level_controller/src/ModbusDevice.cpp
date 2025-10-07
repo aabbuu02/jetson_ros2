@@ -1,49 +1,121 @@
+#include <ros/console.h>
+#include "ModbusDevice.h"
+
+
 /**
- * @file ModbusDevice.cpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
-#include "lower_level_controller/ModbusDevice.h"
-#include <stdexcept>
-
-ModbusDevice::ModbusDevice(const std::string& ip_address, int port, rclcpp::Logger logger) : logger_(logger)
+* @brief  Establishes the connection to the MODBUS device
+* @param  ipAddress  IP address of the MODBUS device 
+  @param  port the port number of the device
+*/
+void ModbusDevice::connectToDevice(const std::string &ipAddress,int port)
 {
-    ctx_ = modbus_new_tcp(ip_address.c_str(), port);
-    if (ctx_ == nullptr) {
-        throw std::runtime_error("modbus_new_tcp failed");
+
+    ROS_INFO_NAMED("ModbusController","Connecting to modbus device on %s/%d", ipAddress.c_str(), port);
+    plc = modbus_new_tcp(ipAddress.c_str(), port);
+    if (plc == NULL)
+    {
+        ROS_FATAL_NAMED("ModbusController","Unable to allocate libmodbus context\n");
+        return;
     }
-    if (modbus_connect(ctx_) == -1) {
-        modbus_free(ctx_);
-        throw std::runtime_error("modbus_connect failed");
+    if (modbus_connect(plc) == -1)
+    {
+        ROS_FATAL_NAMED("ModbusController","Failed to connect to modbus device -  %s",modbus_strerror(errno));
+        modbus_free(plc);
+        return;
     }
-    RCLCPP_INFO(logger_, "Modbus TCP connection successful.");
+    else
+    {
+        ROS_INFO_NAMED("ModbusController","Connection to modbus device establisher");
+    }
+
 }
 
-ModbusDevice::~ModbusDevice()
+
+
+
+
+/**
+* @brief  Reads the data from PLC registers 
+*/
+void ModbusDevice::readRegister()
 {
-    if (ctx_ != nullptr) {
-        modbus_close(ctx_);
-        modbus_free(ctx_);
+    //modbus_read_register does not throw any exeception. No need for try catch block
+    
+	try
+    {
+        int reg_data_test = modbus_read_registers(plc, 0, READREGISTERNUMBER, m_registerData);
+
+        if (reg_data_test == -1) 
+        {
+            ROS_ERROR_STREAM("Unable to read reg addr: "<<modbus_strerror(errno));
+            throw -1; //The return from the modbus_read_register function indicates an error anyway
+        }
+    }
+    catch (int e) //Redundant
+    {
+        ROS_ERROR("modbus_error");
+    }
+
+}
+
+
+/**
+* @brief  Writing the value to PLC register
+* @param  regAddress  register address to which the value is to be written
+* @param  value value to be written to the register
+*/
+void ModbusDevice::writeRegister(int registerAddress, int value)
+{
+	ROS_INFO("writeRegister()");
+
+    try
+    {
+        int reg_data_test = modbus_write_register(plc, registerAddress, value);
+        if (reg_data_test == -1)
+        {
+            ROS_ERROR("Unable to write  reg addr %d:", registerAddress);
+            throw value;
+        }
+    }
+    catch (int e)
+    {
+        ROS_ERROR("modbus error value %d: out of range", e);
     }
 }
 
-int ModbusDevice::readRegister(int addr)
+/*Reference : https://libmodbus.org/docs/v3.0.8/modbus_write_registers.html*/
+/**
+* @brief  Writing the value to PLC registers
+* @param  write the content of the nb holding registers from the array src at address addr of the remote device.
+*/
+void ModbusDevice::writeRegisters(int addr, int nb, uint16_t data[])
 {
-    uint16_t val;
-    if (modbus_read_registers(ctx_, addr, 1, &val) == -1) {
-        RCLCPP_ERROR(logger_, "Failed to read register %d: %s", addr, modbus_strerror(errno));
-        return -1;
+    try
+    {
+        int reg_data_test = modbus_write_registers(plc, addr, nb, data);
+        if (reg_data_test == -1)
+        {
+            ROS_ERROR("Unable to write register address");
+            throw -1;
+        }
     }
-    return val;
+    catch (int e)
+    {
+        ROS_ERROR("Unable to write registers address");
+    }
 }
 
-bool ModbusDevice::writeRegister(int addr, int value)
+/**
+* @brief  Reads motor feedback ,which is a 32 bit value 
+* @param  encoderNuber the index of the encoder to be read
+* @returns distance travelled in cms
+*/
+uint32_t ModbusDevice::readEncoder(int encoderNumber)
 {
-    if (modbus_write_register(ctx_, addr, value) == -1) {
-        RCLCPP_ERROR(logger_, "Failed to write to register %d: %s", addr, modbus_strerror(errno));
-        return false;
-    }
-    return true;
+    uint32_t distanceInCm = (m_registerData[encoderNumber] * 65536) + m_registerData[encoderNumber + 1];
+    return distanceInCm;
 }
+
+
+
+

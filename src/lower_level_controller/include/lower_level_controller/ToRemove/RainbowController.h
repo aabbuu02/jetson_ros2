@@ -1,10 +1,3 @@
-/**
- * @file RainbowController.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #ifndef RAINBOW_CONTROLLER_H
 #define RAINBOW_CONTROLLER_H
 

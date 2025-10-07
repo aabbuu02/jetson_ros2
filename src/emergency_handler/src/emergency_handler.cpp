@@ -1,70 +1,192 @@
+#include "emergency_handler.h"
+
+
 /**
- * @file emergency_handler.cpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
-#include "rclcpp/rclcpp.hpp"
-#include "anscer_msgs/msg/safety_field.hpp"
-#include "geometry_msgs/msg/twist.hpp"
-#include <memory>
-
-// In ROS 2, nodes are classes that inherit from rclcpp::Node
-class EmergencyHandler : public rclcpp::Node
+* @brief  Constructor for the EmergengencyHandler
+*/
+EmergengencyHandler::EmergengencyHandler()
 {
-public:
-  // The constructor is where we initialize the node, publishers, and subscribers
-  EmergencyHandler()
-  : Node("emergency_handler_node")
-  {
-    // Create the publisher. The API is slightly different from ROS 1.
-    // CORRECTED: Changed '/' to '::' for the message type
-    publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/emergency_cmd_vel", 10);
+    ROS_INFO("EmergengencyHandler Constructor called");
 
-    // Create the subscriber. The syntax uses a template and std::bind.
-    // CORRECTED: Changed '/' to '::' for the message type
-    subscription_ = this->create_subscription<anscer_msgs::msg::SafetyField>(
-      "/safety_field_status", 10, std::bind(&EmergencyHandler::topic_callback, this, std::placeholders::_1));
+    /*Subscribers*/
+    detectionSub      = nh.subscribe("/obstacle_detection", 1, &EmergengencyHandler::detectionCallback,this);
+    buttonSub         = nh.subscribe("/e_stop/button", 1, &EmergengencyHandler::eStopButtonCallback,this);    
+    webAppSub         = nh.subscribe("/e_stop/webApp", 1, &EmergengencyHandler::eStopWebAppCallback,this);
+    
+    cmdSub            = nh.subscribe("cmd_vel", 1, &EmergengencyHandler::cmdVelCallback,this);
+    keycmdSub         = nh.subscribe("joy/cmd_vel", 1, &EmergengencyHandler::keycmdVelCallback,this);
+    
+    tagDetFailSub = nh.subscribe("e_stop/tag_detection", 1, &EmergengencyHandler::tagDetFailCallback, this);
 
-    RCLCPP_INFO(this->get_logger(), "Emergency Handler Node has been started.");
-  }
+    /*Publishers*/
 
-private:
-  // The callback function now takes a shared pointer to the message
-  void topic_callback(const anscer_msgs::msg::SafetyField::SharedPtr msg)
-  {
-    // TODO: This logic is temporary. It should be replaced with a parameter
-    // to select which field(s) trigger the emergency stop (e.g., front, rear, or both).
-    if (msg->is_front)
-    {
-      // Create a Twist message to publish
-      auto stop_msg = geometry_msgs::msg::Twist();
-      
-      // All fields are zero by default, so we don't need to set them.
-      // Publish the stop message
-      publisher_->publish(stop_msg);
-      RCLCPP_WARN(this->get_logger(), "Emergency stop triggered by front field!");
-    }
-  }
+    eStopPub          = nh.advertise<std_msgs::Bool>("e_stop", 1);
+    eStopLidarPub     = nh.advertise<std_msgs::Bool>("e_stop/lidar", 1);
+    eStopButtonPub    = nh.advertise<std_msgs::Bool>("e_stop/buttons", 1);
 
-  // Declare the publisher and subscriber as member variables
-  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
-  rclcpp::Subscription<anscer_msgs::msg::SafetyField>::SharedPtr subscription_;
-};
-
-// The main function is where the ROS 2 system is initialized
-int main(int argc, char * argv[])
-{
-  // Initialize rclcpp
-  rclcpp::init(argc, argv);
-
-  // Create an instance of our node and spin it, which allows callbacks to be processed
-  rclcpp::spin(std::make_shared<EmergencyHandler>());
-
-  // Shut down rclcpp
-  rclcpp::shutdown();
-  return 0;
+   // cmdPub	      = nh.advertise<geometry_msgs::Twist>("cmd_vel",1);
 }
+
+/**
+* @brief  Destructor for the EmergengencyHandler
+*/
+
+EmergengencyHandler::~EmergengencyHandler()
+{
+}
+
+
+
+
+
+/**
+* @brief  Call back for checking if object detected on front side of robot
+*/
+void EmergengencyHandler::detectionCallback(const anscer_msgs::SafetyFields &msg)
+{
+    m_lidarForward  = msg.safety[0].is_front;
+    m_lidarBackward =  msg.safety[0].is_rear;
+}
+
+
+/**
+* @brief  Call back for emergency stop button
+*/
+void EmergengencyHandler::eStopButtonCallback(const std_msgs::Bool &msg)
+{
+     m_eStopButton  = msg.data;
+}
+
+/**
+* @brief  Call back for emergency stop from WebApp
+*/
+void EmergengencyHandler::eStopWebAppCallback(const std_msgs::Bool &msg)
+{
+     m_eStopWebApp  = msg.data;
+}
+
+/**
+* @brief  Call back for emergency stop from Lidar
+*/
+void EmergengencyHandler::cmdVelCallback(const geometry_msgs::Twist &msg)
+{
+    m_linearVel  = msg.linear.x;
+}
+
+
+/**
+* @brief  Call back for emergency stop from Lidar
+*/
+void EmergengencyHandler::keycmdVelCallback(const geometry_msgs::Twist &msg)
+{
+    m_keyLinearVel  = msg.linear.x;
+    m_keyAngularVel = msg.angular.z;
+}
+
+/**
+* @brief  Callback for emergency stop from tag detection failure
+*/
+void EmergengencyHandler::tagDetFailCallback(const std_msgs::Bool &msg)
+{
+    m_eStopTagDetection = msg.data;
+}
+
+/**
+* @brief  Publishes e_stop based on input from various sources
+*/
+void EmergengencyHandler::publishMessages()
+{
+    std_msgs::Bool eStopMsg,eStopLidarMsg,eStopButtonMsg;
+    bool estopLidar = false;
+    bool cmdVelLidar    = ((m_lidarForward && (m_linearVel > 0.0)) || (m_lidarBackward && (m_linearVel < 0.0)));
+    bool stopedcmdVelLidar    = ((m_lidarForward && (m_linearVel == 0.0)) || (m_lidarBackward && (m_linearVel == 0.0)));
+    bool keyCmdVelLidar = ((m_lidarForward && (m_keyLinearVel < 0.0)) || (m_lidarBackward && (m_keyLinearVel > 0.0)));
+    
+    bool keyCmdTagDetection = ((m_keyLinearVel != 0.0) || (m_keyAngularVel != 0.0));    
+
+    if(cmdVelLidar||stopedcmdVelLidar)
+    {
+        estopLidar = true;
+    }
+
+    if(keyCmdVelLidar)
+    {
+        estopLidar = false;
+    }
+
+    if(keyCmdTagDetection)
+    {
+        m_eStopTagDetection = false;
+    }
+
+    if(m_eStopButton || m_eStopWebApp)
+    {
+        eStopButtonMsg.data = true;
+    }
+    else
+    {
+        eStopButtonMsg.data = false;
+    }
+
+    if(estopLidar)
+    {
+        eStopLidarMsg.data=true;
+    }
+    else
+    {
+        eStopLidarMsg.data = false;
+    }
+
+    if(estopLidar || m_eStopButton || m_eStopWebApp || m_eStopTagDetection)
+    {
+        eStopMsg.data = true;
+    }
+    else
+    {
+        eStopMsg.data = false;
+    }
+    eStopPub.publish(eStopMsg);
+    eStopButtonPub.publish(eStopButtonMsg);
+    eStopLidarPub.publish(eStopLidarMsg);
+   
+    /*
+
+    if(eStopMsg.data == true)
+    {
+    	geometry_msgs::Twist cmdMsg;
+	cmdMsg.linear.x  = 0.0;
+	cmdMsg.angular.z = 0.0;
+	cmdPub.publish(cmdMsg);
+	    
+    }	    
+   */	
+}
+
+
+
+/**
+* @brief Main function
+*/
+int main(int argc, char** argv)
+{
+
+    ros::init(argc, argv, "EmergengencyHandler");
+    EmergengencyHandler emergencyHandler;
+    ros::Rate rate(20);
+
+    while(ros::ok())
+    {
+        emergencyHandler.publishMessages();
+        rate.sleep();
+        ros::spinOnce();
+    }
+    ros::shutdown();
+    return 0;
+}
+
+
+
+
+
 
 

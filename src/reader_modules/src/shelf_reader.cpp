@@ -1,168 +1,169 @@
-/**
- * @file shelf_reader.cpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
-#include "reader_modules/shelf_reader.h"
+#include "shelf_reader.h"
+#include <ros/console.h>
 
 /**
- * @brief Constructor for the ShelfReader
+ * @brief  Constructor for the ShelfReader
  */
-ShelfReader::ShelfReader() : Node("shelf_reader")
+ShelfReader::ShelfReader() : nhp("~")
 {
-    // Declare parameters
-    this->declare_parameter<std::string>("ip_address", "192.168.1.166");
-    this->declare_parameter<int>("port_number", 23);
-    
-    initializeParameters();
-    // initializeConnection(); // Uncomment when ready to connect to hardware
+    //initializeParameters();
+    //initializeConnection();
 
-    shelfSrvc = this->create_service<anscer_msgs::srv::ShelfReader>(
-        "shelf_reader",
-        std::bind(&ShelfReader::shelfLocation, this, std::placeholders::_1, std::placeholders::_2));
-        
-    RCLCPP_INFO(this->get_logger(), "ShelfReader node initialized");
+    shelfSrvc = nh.advertiseService("shelf_reader", &ShelfReader::shelfLocation, this);
 }
 
 /**
- * @brief Destructor for the ShelfReader
+ * @brief  Destructor for the ShelfReader
  */
 ShelfReader::~ShelfReader()
 {
-    if (m_socket > 0) {
-        close(m_socket);
-    }
 }
 
 /**
- * @brief Initializes the parameters from the parameter server
+ * @brief  Initializes the parameters from the parameter server
  */
 void ShelfReader::initializeParameters()
 {
-    this->get_parameter("ip_address", m_ipAddress);
-    this->get_parameter("port_number", m_portNumber);
-    
-    RCLCPP_INFO(this->get_logger(), "IP: %s, Port: %d", m_ipAddress.c_str(), m_portNumber);
+    nhp.param<std::string>("ip_address", m_ipAddress, "192.168.1.166");\
+    nhp.param("port_number", m_portNumber, 23);
 }
 
+
 /**
- * @brief Initializes the connection with the shelf reading module
+ * @brief  Initializes the connection with the shelf reading module
  */
 void ShelfReader::initializeConnection()
 {
     int connectionStatus = 0;
     if ((m_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        RCLCPP_ERROR(this->get_logger(), "Socket creation error");
+        ROS_ERROR_NAMED("ShelfReader", "Socket creation error");
         connectionStatus = -1;
     }
 
     m_socketAddress.sin_family = AF_INET;
     m_socketAddress.sin_port = htons(m_portNumber);
 
-    if (inet_pton(AF_INET, m_ipAddress.c_str(), &m_socketAddress.sin_addr) <= 0)
+    // Convert IPv4 and IPv6 addresses from text to binary
+    // form
+    if (inet_pton(AF_INET, m_ipAddress.c_str(), &m_socketAddress.sin_addr) <= 0) // Incase if it fails replace m_ipAddress by "192.168.1.166"
     {
-        RCLCPP_ERROR(this->get_logger(), "Invalid address. Address not supported");
+        ROS_ERROR_NAMED("ShelfReader", "Invalid address Address not supported ");
         connectionStatus = -1;
     }
 
     if ((m_clientFD = connect(m_socket, (struct sockaddr *)&m_socketAddress, sizeof(m_socketAddress))) < 0)
     {
-        RCLCPP_ERROR(this->get_logger(), "Connection Failed");
+        ROS_ERROR_NAMED("ShelfReader", "Connection Failed");
         connectionStatus = -1;
     }
-    
     if (connectionStatus < 0)
     {
-        RCLCPP_ERROR(this->get_logger(), "Failed connecting with the COGNEX device");
+        ROS_ERROR_NAMED("ShelfReader", "Failed connecting with the COGNEX device");
     }
     else
     {
-        RCLCPP_INFO(this->get_logger(), "Successfully connected with COGNEX device");
+        ROS_ERROR_NAMED("ShelfReader", "Successfully connected with COGNEX device");
     }
 }
 
 /**
- * @brief Reads the barcode data from the shelf
+ * @brief  Reads the barcode data from the shelf
+ * @returns the read barcode value in string format
  */
 std::string ShelfReader::startReadData()
 {
+
     int buffer[1024] = {0};
     int valRead;
 
-    RCLCPP_INFO(this->get_logger(), "Starting reading data");
+    std::cout << "strating reading data" << std::endl;
     int writeData = write(m_socket, m_triggerOn, strlen(m_triggerOn));
     if (writeData < 0)
     {
-        RCLCPP_ERROR(this->get_logger(), "Couldn't trigger the device, initializing reattempt");
+        ROS_ERROR_NAMED("ShelfReader", "Couldn't trigger the device,initializing reattempt");
         close(m_clientFD);
-        RCLCPP_ERROR(this->get_logger(), "Attempting re-connection with COGNEX device");
+        ROS_ERROR_NAMED("ShelfReader", "Attempting re-connection with COGNEX device");
         initializeConnection();
     }
 
-    fd.fd = m_socket;
+    fd.fd = m_socket; // your socket handler
     fd.events = POLLIN;
-    int ret = poll(&fd, 1, 1000); // 1 second timeout
-    
+    int ret = poll(&fd, 1, 1000); // 1 second for timeout
     switch (ret)
     {
     case -1:
-        RCLCPP_ERROR(this->get_logger(), "Poll error");
+        // Error
         break;
     case 0:
-        RCLCPP_WARN(this->get_logger(), "Poll timeout");
+        // Timeout
         break;
     default:
-        valRead = recv(m_socket, buffer, sizeof(buffer), 0);
+        valRead = recv(m_socket, buffer, sizeof(buffer), 1024); // get your data
         break;
     }
+    // std::cout << "valread :" << valRead << "- data: " << buffer << std::endl;
     
     std::string data;
     for (int i = 0; i < valRead; i++)
     {
-        data += std::to_string(buffer[i]);
+        // std::cout << buffer[i];
+        std::string data_read;
+        data_read = buffer[i];
+        data.append(data_read);
     }
 
     return data;
 }
 
 /**
- * @brief Stops reading the device data from the sensor
- */
+* @brief  Stops reading the device data from the sensor
+*/
 void ShelfReader::stopReadData()
 {
-    RCLCPP_INFO(this->get_logger(), "Stops reading COGNEX data");
-    send(m_socket, m_triggerOff, strlen(m_triggerOff), 0);
+    ROS_ERROR_NAMED("ShelfReader", "Stops reading COGNIX data");
+	send(m_socket, m_triggerOff, strlen(m_triggerOff), 0);
 }
 
-/**
- * @brief Service callback that returns shelf barcode data
- */
-void ShelfReader::shelfLocation(
-    const std::shared_ptr<anscer_msgs::srv::ShelfReader::Request> req,
-    std::shared_ptr<anscer_msgs::srv::ShelfReader::Response> res)
-{
-    // For testing in simulation use the following
-    int64_t dummyReq = req->dummy_req;
-    res->shelf_response = dummyReq;
 
-    // Post testing in real robot use the following
-    // res->shelf_response = startReadData();
+/**
+* @brief  Service callback that returns nearest charger location to the robot
+*/
+bool ShelfReader::shelfLocation(anscer_msgs::ShelfReader::Request &req, anscer_msgs::ShelfReader::Response &res)
+{
+    /*For testing in simulation use the following and comment the lines below that*/
+
+    int64_t dummyReq       = req.dummy_req;
+    res.shelf_response     = dummyReq ;
+
+    /*Post testing in real robot use the following and comment the above lines*/
+
+    // res.shelf_response     = startReadData();
     // stopReadData();
 
-    RCLCPP_WARN(this->get_logger(), "ShelfReader requested dummy: %ld", dummyReq);
+
+    ROS_WARN("ShelfReader  requested dummy  : %ld",dummyReq);
+
+    return true;
 }
 
-/**
+
+/*
  * @brief Main function
  */
 int main(int argc, char **argv)
 {
-    rclcpp::init(argc, argv);
-    auto node = std::make_shared<ShelfReader>();
-    rclcpp::spin(node);
-    rclcpp::shutdown();
+    ros::init(argc, argv, "shelf_reader");
+    ShelfReader shelfReader;
+
+    ros::Rate r(1);
+    while (ros::ok())
+    {
+
+        r.sleep();
+        ros::spinOnce();
+    }
+
+    ros::shutdown();
     return 0;
 }

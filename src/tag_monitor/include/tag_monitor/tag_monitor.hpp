@@ -1,52 +1,52 @@
-/**
- * @file tag_monitor.hpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
+#pragma once
 
-#ifndef TAG_MONITOR_HPP
-#define TAG_MONITOR_HPP
-
-#include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/bool.hpp"
-#include "nav_msgs/msg/odometry.hpp"
-#include "anscer_msgs/msg/pgv_pose.hpp"
-
+#include <ros/ros.h>
 #include <tf2/LinearMath/Vector3.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <tf2/convert.h>
+#include <tf2/utils.h>
+#include <std_msgs/Bool.h>
+#include <nav_msgs/Odometry.h>
+#include <anscer_msgs/PGVPose.h>
 
-class TagMonitor : public rclcpp::Node
+
+class TagMonitor
 {
+
 public:
-    TagMonitor();
+
+    TagMonitor(); 
 
 private:
-    // Callbacks
-    void odometry_cb(const nav_msgs::msg::Odometry::SharedPtr msg);
-    void detected_tag_cb(const anscer_msgs::msg::PGVPose::SharedPtr msg);
-    void initialize_robot_cb(const std_msgs::msg::Bool::SharedPtr msg);
-
-    // Member variables
-    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr m_eStopPub;
-    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr m_initRobotPub;
-
-    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr m_odomSub;
-    rclcpp::Subscription<anscer_msgs::msg::PGVPose>::SharedPtr m_detectedTagSub;
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr m_initRobotSub;
-
-    bool m_isRobotInitialized = false;
-    bool m_enableTagDetAsInit;
-    double m_maxDetectionDistance;
-    double m_curDistTravelled = 0.0;
     
-    int m_curTagId = -1;
-    int m_prevTagId = -1;
+    ros::NodeHandle m_nh, m_nhp;
 
-    tf2::Vector3 m_curPoseVec;
-    tf2::Vector3 m_prevPoseVec;
+    //Messages
+    std_msgs::Bool m_eStopMsg, m_initRobotMsg;
+
+    //Publishers
+    ros::Publisher m_eStopPub, m_initRobotPub;
+
+    //Subscribers
+    ros::Subscriber m_odomSub, m_detectedTagSub, m_initRobotSub;
+
+    //Subscriber callbacks
+    void odometryCb(const nav_msgs::Odometry &odomMsg);
+    void detectedTagCb(const anscer_msgs::PGVPose &tagMsg);
+    void initializeRobotCb(const std_msgs::Bool &initStateMsg);
+
+    //Topic names
+    std::string m_odomTopic, m_initRobotTopic, m_deinitRobotTopic, m_detTagTopic, m_eStopTopic;
+
+    //Tag monitoring variables
+    bool m_enableTagDetAsInit = false;
+    uint32_t m_curTagId = 0;
+    uint32_t m_prevTagId = 0;
+    double m_maxDetectionDistance = 1.0f; //Maximum distance that can be travelled without detecting a tag in meters
+    
+    //Distance travelled by the robot
+    bool m_isRobotInitialized = false;  
+    tf2::Vector3 m_prevPoseVec, m_curPoseVec;
+    double m_curDistTravelled = 0.0f;
+
+    void getParameters();
 };
-
-#endif // TAG_MONITOR_HPP
-
-

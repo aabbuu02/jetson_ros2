@@ -1,54 +1,176 @@
 /**
  * @file HigherLevelInterface.cpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
+ * @author Jishnu (jishnu@anscer.com)
+ * @brief communication node used for communicating between two  PLC s using modbus protocol
+ *
+ * @version 0.1
+ * @date 2022-07-23
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+/**
+ * @brief include headerfiles
  */
 
 #include "brake_action/HigherLevelInterface.h"
 
-// This class now handles all ROS 2 logic
-HigherLevelInterface::HigherLevelInterface() : Node("brake_action_node")
+HigherLevelInterface::HigherLevelInterface()
 {
-    // Declare ROS 2 parameters with default values
-    this->declare_parameter<std::string>("ip_address", "127.0.0.1");
-    this->declare_parameter<int>("port", 502);
+    ROS_INFO("Higher_interface_constructor_called");
+    p_modbusCommunicator=new ModbusCommunicator();
+    m_updateRate={0};
+    m_writeRegistornumber={0};
+    m_writeValue={0};
 
-    // Get parameters
-    std::string ip = this->get_parameter("ip_address").as_string();
-    int port = this->get_parameter("port").as_int();
+    m_parameterExistanceFlag=checkParameters();
 
-    RCLCPP_INFO(this->get_logger(), "Attempting to connect to Modbus server at %s:%d", ip.c_str(), port);
-
-    // Initialize the Modbus communicator with the parameters
-    if (modbus_communicator_.initiateConnection(ip, port) == 0) {
-        RCLCPP_INFO(this->get_logger(), "Modbus connection successful.");
-    } else {
-        RCLCPP_ERROR(this->get_logger(), "Failed to connect to Modbus server.");
+    if(m_parameterExistanceFlag==0)
+    {
+        ROS_ERROR("failed to load HigherLevelInterface parameters");
+        
+        exit(0);
     }
-
-    // Create the ROS 2 service server
-    service_ = this->create_service<std_srvs::srv::SetBool>(
-        "brake_service",
-        std::bind(&HigherLevelInterface::service_callback, this, std::placeholders::_1, std::placeholders::_2));
+    else
+    {
+        int feedBack=readParameters();
+        if(feedBack !=0)
+          {
+            ROS_ERROR("parameter reading failed");
+            
+            
+            exit(0);
+            
+          }
+        else
+          {
+            ROS_INFO("All HigherLevelInterface parameter read successfully");
+            
+            
+            
+            
+          }
+    }
     
-    RCLCPP_INFO(this->get_logger(), "Brake Action service is ready.");
+    /**
+     * @brief publisher definition
+     * 
+     */
+
+    brakeActivator = p_modbusCommunicator->nh.subscribe(m_subscriberTopic, 1, &HigherLevelInterface::brakeActivatorCallback, this);
+
+}
+/**
+ * @brief Destroy the Higher Level Interface:: Hiigher Level Interface object
+ * 
+ */
+HigherLevelInterface::~HigherLevelInterface()
+{
+ 
 }
 
-void HigherLevelInterface::service_callback(
-    const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-    std::shared_ptr<std_srvs::srv::SetBool::Response> response)
-{
-    int register_value = request->data ? 1 : 0;
-    int write_status = modbus_communicator_.writeData(40001, register_value);
 
-    if (write_status == 0) {
-        response->success = true;
-        response->message = "Brake state set successfully.";
-        RCLCPP_INFO(this->get_logger(), "Brake state changed to: %d", register_value);
-    } else {
-        response->success = false;
-        response->message = "Failed to write to brake register.";
-        RCLCPP_ERROR(this->get_logger(), "Failed to set brake state.");
-    }
+
+
+/**
+ * @brief callback function for brakeActivatorCallback
+ * 
+ */
+void HigherLevelInterface::brakeActivatorCallback(const std_msgs::Bool &msg)
+{
+
+
+ 
+  ROS_INFO("brake Activator subscriber  called");
+  m_writeValue=int(msg.data);
+
+  writeData(m_writeRegistornumber,m_writeValue);
+
+
+
+}
+
+
+
+
+/**
+ * @brief for checking the availability of parameters
+ * @brief returns true if all the parameters exists or return false
+ */
+
+bool HigherLevelInterface::checkParameters()
+{
+  ROS_INFO("checking existance of parameters");
+  if(p_modbusCommunicator->nh.hasParam("/HigherLevelInterface/update_rate")!=1)
+  {
+    ROS_WARN("updateRate param misssing");
+    return 0;
+  }
+ else if(p_modbusCommunicator->nh.hasParam("/HigherLevelInterface/subscriberTopic")!=1)
+  {
+    ROS_WARN("subscriberTopic param misssing");
+    return 0;
+  }
+else  if(p_modbusCommunicator->nh.hasParam("/HigherLevelInterface/registerNumber")!=1)
+  {
+    ROS_WARN("regsiter number param misssing");
+    return 0;
+  }
+
+
+else
+  {
+    ROS_INFO("all parameters available");
+    return 1;
+    
+  }
+}
+
+/**
+ * @brief readParameters definition
+ * 
+ */
+int HigherLevelInterface::readParameters()
+{
+ ROS_INFO("reading higher level interface parameters");
+  
+  
+ p_modbusCommunicator->nh.getParam("/HigherLevelInterface/update_rate",m_updateRate);
+ 
+ p_modbusCommunicator->nh.getParam("/HigherLevelInterface/subscriberTopic", m_subscriberTopic);
+
+
+ p_modbusCommunicator->nh.getParam("/HigherLevelInterface/registerNumber",m_writeRegistornumber);
+
+ 
+ return 0;
+}
+
+
+int HigherLevelInterface::writeData(int m_writeRegistornumber,int m_writeValue)
+{
+   ROS_INFO("linside writeData");
+
+    p_modbusCommunicator->writeDataToRegister(m_writeRegistornumber,m_writeValue);
+}
+
+/**
+ *@brief main function
+ */
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "modbus_communicator");
+  HigherLevelInterface HigherLevelInterface;
+  ros::Rate loop_rate(HigherLevelInterface.m_updateRate); 
+  
+  while (ros::ok())
+  {
+
+   ros::spinOnce();
+   loop_rate.sleep();
+  }
+
+  
+
+  return 0;
 }

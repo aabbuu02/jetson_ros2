@@ -1,55 +1,72 @@
-/**
- * @file power_control.hpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
-#ifndef POWER_CONTROL_HPP
-#define POWER_CONTROL_HPP
-
-#include "rclcpp/rclcpp.hpp"
-#include "std_srvs/srv/trigger.hpp"
+#include <unistd.h>
+#include <linux/reboot.h>
+#include <sys/reboot.h>
+#include <cerrno>
 #include <vector>
 #include <string>
 
-// The node is now a class inheriting from rclcpp::Node
-class PowerControl : public rclcpp::Node
+#include <ros/ros.h>
+#include <std_srvs/Trigger.h>
+#include <xmlrpcpp/XmlRpc.h>
+#include <dynamic_reconfigure/server.h>
+#include <power_control/PowerControlConfig.h>
+
+class PowerControl
 {
-public:
-    PowerControl();
+    public:
 
-private:
-    // ROS 2 Service Callbacks
-    void poweroff_callback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-                           std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-    void reboot_callback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-                         std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+    PowerControl(ros::NodeHandle &nh);
+    void run();
 
-    // ROS 2 Parameter Callback (replaces dynamic_reconfigure)
-    rcl_interfaces::msg::SetParametersResult parameters_callback(
-        const std::vector<rclcpp::Parameter> &parameters);
+    private:
 
-    // Helper functions
-    bool call_slave_services(const std::string& service_type);
-    void execute_system_command(const std::string& command_type);
+    //Power control command
+    enum PowerCtrlCommands
+    {
+        WAIT = 0,
+        POWEROFF = 1,
+        REBOOT = 2
+    };
 
-    // Member Variables
-    bool is_master_system_;
-    bool enable_system_pwr_ctrl_;
-    bool enable_slave_pwr_ctrl_;
-    std::string system_name_;
-    std::vector<std::string> slave_system_names_;
+    uint8_t m_powerCtrlCmd = WAIT;
 
-    // ROS 2 Services and Clients
-    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr poweroff_srv_;
-    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reboot_srv_;
-    std::vector<rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr> slave_poweroff_clients_;
-    std::vector<rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr> slave_reboot_clients_;
+    //Current systems settings
+    bool m_isMasterSystem;
+    bool m_enableSystemPwrCtrl;
+    bool m_enableSlavePwrCtrl;
+    std::string m_systemName;
+    
+    //Slave sytem settings
+    int m_noOfSlaves;
+    std::vector<std::string> m_slaveSystemNames;
 
-    // ROS 2 Parameter callback handle
-    OnSetParametersCallbackHandle::SharedPtr parameter_callback_handle_;
+    //Nodehandle
+    ros::NodeHandle nh, nhp;
+
+    //Service servers
+    ros::ServiceServer poweroffSrvServer;
+    ros::ServiceServer rebootSrvServer;
+
+    //Service callbacks
+    bool poweroffSrvCallback(std_srvs::TriggerRequest &req, std_srvs::TriggerResponse &res);
+    bool rebootSrvCallback(std_srvs::TriggerRequest &req, std_srvs::TriggerResponse &res);
+
+    //Service clients
+    std::vector<ros::ServiceClient> slavePowerOffSrvClients;
+    std::vector<ros::ServiceClient> slaveRebootSrvClients;
+
+    //Dynamic reconfigure
+    dynamic_reconfigure::Server<power_control::PowerControlConfig> pwrCtrlDynCfgServer;
+    dynamic_reconfigure::Server<power_control::PowerControlConfig>::CallbackType pwrCtrlCfgCallbackType;
+
+    //Dynamic reconfigure callback
+    void powerControlReconfigCallback(power_control::PowerControlConfig &config, uint32_t level);
+
+    //Other functions
+    void getParameters();
+    void waitForServices();
+    bool powerOffSystem();
+    bool rebootSystem();
+    bool poweroffSlaveSystems();
+    bool rebootSlaveSystems();
 };
-
-#endif // POWER_CONTROL_HPP
-

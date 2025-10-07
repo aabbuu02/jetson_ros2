@@ -1,34 +1,68 @@
 /**
  * @file HigherLevelInterface.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
+ * @author Jishnu (jishnu@anscer.com)
+ * @brief communication node used for communicating between two  PLC s using modbus protocol
+ *
+ * @version 0.1
+ * @date 2022-07-23
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+/**
+ * @brief include headerfiles
  */
 
-#ifndef HIGHER_LEVEL_INTERFACE_H
-#define HIGHER_LEVEL_INTERFACE_H
+#ifndef HIGHER_LEVEL_INTERFACE
+#define HIGHER_LEVEL_INTERFACE
 
-#include "rclcpp/rclcpp.hpp"
-#include "std_srvs/srv/set_bool.hpp"
-#include "brake_action/ModbusCommunicator.h"
-#include <memory>
+#include "ModbusCommunicator.h"
+#include "std_msgs/Bool.h"
+
+#include <fstream>
+#include<iostream>
+#include <sstream>  // for string streams
 #include <string>
 
-// This is the main ROS 2 Node class
-class HigherLevelInterface : public rclcpp::Node
+class HigherLevelInterface
 {
-public:
+    public:
     HigherLevelInterface();
+    ~HigherLevelInterface();
 
-private:
-    void service_callback(
-        const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-        std::shared_ptr<std_srvs::srv::SetBool::Response> response);
 
-    rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr service_;
-    ModbusCommunicator modbus_communicator_;
+    int writeData(int m_writeRegistornumber,int m_writeValue);
+
+    ModbusCommunicator *p_modbusCommunicator;
+    int m_updateRate;
+
+
+    
+    void brakeActivatorCallback(const std_msgs::Bool &msg);
+
+     
+    private:
+    bool  checkParameters();
+    int readParameters();
+    bool m_parameterExistanceFlag;
+    
+
+    int m_writeRegistornumber;
+    int m_writeValue;
+
+    std::string m_subscriberTopic;
+
+    
+
+
+ 
+    
+    ros::Subscriber brakeActivator;
+
+    
+
+    
+
 };
 
-#endif // HIGHER_LEVEL_INTERFACE_H
-
-
+#endif

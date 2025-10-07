@@ -1,10 +1,3 @@
-/**
- * @file emergency_handler.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #ifndef EMERGENCY_HANDLER_H
 #define EMERGENCY_HANDLER_H
 

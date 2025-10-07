@@ -1,26 +1,32 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
+<package format="2">
   <name>acr_robot_controller</name>
   <version>0.0.0</version>
-  <description>The acr_robot_controller package</description>
-  <maintainer email="user@todo.todo">user</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Motor controller package for ACR</description>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer>  " "-->
+  <maintainer email="raj@anscer.com" >Raj Mohan </maintainer>
 
-  <depend>rclcpp</depend>
-  <depend>std_msgs</depend>
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+ 
+  <buildtool_depend>catkin</buildtool_depend>
   <depend>geometry_msgs</depend>
-  <depend>nav_msgs</depend>
-  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
   <depend>anscer_msgs</depend>
-  <depend>tf2_ros</depend>
-  <depend>tf2_geometry_msgs</depend>
+  <depend>actionlib</depend>
+  <depend>sensor_msgs</depend>
 
+  <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <build_type>ament_cmake</build_type>
+    <!-- Other tools can request additional information be placed here -->
+
   </export>
 </package>
-
-

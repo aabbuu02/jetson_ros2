@@ -1,27 +1,33 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
+<package format="2">
   <name>reader_modules</name>
   <version>0.0.0</version>
   <description>Reads the bar codes placed on ground and racks</description>
-  <maintainer email="raj@anscer.com">Raj Mohan</maintainer>
+
+  <maintainer email="raj@anscer.com" >Raj Mohan </maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
   <license>TODO</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>rclcpp</depend>
   <depend>geometry_msgs</depend>
   <depend>std_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
   <depend>anscer_msgs</depend>
-  <depend>visualization_msgs</depend>
-  <depend>ament_index_cpp</depend>
-  <depend>tf2</depend>
-  <depend>tf2_geometry_msgs</depend>
+  <depend>actionlib</depend>
+  <depend>libserial-dev</depend>
 
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
 
+
+
+  <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <build_type>ament_cmake</build_type>
+    <!-- Other tools can request additional information be placed here -->
+
   </export>
 </package>
