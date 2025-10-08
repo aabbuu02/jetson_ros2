@@ -1,73 +1,51 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8)
 project(emergency_handler)
 
-add_compile_options(-std=c++11)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(anscer_msgs REQUIRED)
 
-find_package(catkin REQUIRED COMPONENTS
-  
+# Include directories
+include_directories(include)
+
+# Build the executable
+add_executable(emergency_handler_node
+  src/emergency_handler_ros2.cpp
+)
+
+ament_target_dependencies(emergency_handler_node
+  rclcpp
   geometry_msgs
-  roscpp
-  rospy
   std_msgs
-  roslib
   anscer_msgs
- 
-
-  
-
 )
 
-
-
-
-
-
-
-
-
-
-catkin_package(
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS
-    
-    geometry_msgs
-    roscpp
-    rospy
-    std_msgs
-
+# Install the executable
+install(TARGETS emergency_handler_node
+  DESTINATION lib/${PROJECT_NAME}
 )
 
-
-###########
-## Build ##
-###########
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-  ${PROJECT_SOURCE_DIR}/include/
+# Install headers
+install(DIRECTORY include/
+  DESTINATION include
 )
 
-
-add_executable(emergency_handler
-  src/emergency_handler.cpp
-
+# Install launch files
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+  FILES_MATCHING PATTERN "*.launch.py"
 )
 
-target_link_libraries(emergency_handler
-  ${catkin_LIBRARIES}
-)
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
-
-## Mark executables for installation
-
-install(TARGETS emergency_handler 
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
-
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-install(DIRECTORY include launch
-   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-   PATTERN ".svn" EXCLUDE
- )
+ament_package()

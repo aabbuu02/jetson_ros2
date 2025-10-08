@@ -1,75 +1,65 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8)
 project(reader_modules)
 
-add_compile_options(-std=c++11)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(anscer_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
-find_package(catkin REQUIRED COMPONENTS
-  
+# Include directories
+include_directories(include)
+
+# Build the executables
+add_executable(pgv_reader_node
+  src/pgv_reader_ros2.cpp
+)
+
+add_executable(shelf_reader_node
+  src/shelf_reader_ros2.cpp
+)
+
+ament_target_dependencies(pgv_reader_node
+  rclcpp
   geometry_msgs
-  roscpp
-  rospy
   std_msgs
   anscer_msgs
-  roslib
+  visualization_msgs
+  tf2_geometry_msgs
+  tf2_ros
 )
 
-
-
-
-
-
-
-
-
-
-catkin_package(
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS
-    
-    geometry_msgs
-    roscpp
-    rospy
-    std_msgs
-    anscer_msgs
-
-  
-)
-###########
-## Build ##
-###########
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-  ${PROJECT_SOURCE_DIR}/include/reader_modules
+ament_target_dependencies(shelf_reader_node
+  rclcpp
+  geometry_msgs
+  std_msgs
+  anscer_msgs
+  visualization_msgs
+  tf2_geometry_msgs
+  tf2_ros
 )
 
-add_executable(shelf_reader
-  src/shelf_reader.cpp
+# Install the executables
+install(TARGETS pgv_reader_node shelf_reader_node
+  DESTINATION lib/${PROJECT_NAME}
 )
 
-link_directories(/usr/local/lib)
-
-target_link_libraries(shelf_reader
-  ${catkin_LIBRARIES} 
+# Install headers
+install(DIRECTORY include/
+  DESTINATION include
 )
 
-add_executable(pgv_reader
-  src/pgv_reader.cpp
-)
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
-target_link_libraries(pgv_reader
-  ${catkin_LIBRARIES} serial sqlite3
-)
-
-
-install(TARGETS shelf_reader pgv_reader
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
-
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-install(DIRECTORY include launch data
-   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-   PATTERN ".svn" EXCLUDE
- )
+ament_package()

@@ -1,76 +1,62 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8)
 project(acr_robot_controller)
 
-add_compile_options(-std=c++11)
-add_definitions(-Dlinux)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(anscer_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
-find_package(catkin REQUIRED COMPONENTS
-  
+# Include directories
+include_directories(include)
+
+# Build the executable
+add_executable(acr_robot_controller_node
+  src/acr_robot_controller_ros2.cpp
+)
+
+ament_target_dependencies(acr_robot_controller_node
+  rclcpp
   geometry_msgs
-  roscpp
-  rospy
   std_msgs
-  roslib
-  tf
-  dynamic_reconfigure
   anscer_msgs
-  actionlib 
+  sensor_msgs
+  tf2_geometry_msgs
+  tf2_ros
 )
 
-
-catkin_package(
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS
-    sensor_msgs 
-    geometry_msgs
-    roscpp
-    rospy
-    std_msgs
-    actionlib
+# Install the executable
+install(TARGETS acr_robot_controller_node
+  DESTINATION lib/${PROJECT_NAME}
 )
 
-
-###########
-## Build ##
-###########
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-  ${PROJECT_SOURCE_DIR}/include/acr_robot_controller
-)
-#set(CMAKE_CXX_STANDARD_LIBRARIES -ludev)
-
-add_executable(acr_robot_controller
-  src/LowerLevelInterface.cpp
-  src/LowerLevelComputations.cpp
-  src/RosClass.cpp
-
-
-  src/RoboteqController.cpp
-  src/RoboteqDevice.cpp
-
+# Install headers
+install(DIRECTORY include/
+  DESTINATION include
 )
 
-target_link_libraries(acr_robot_controller
-  ${catkin_LIBRARIES}
-  modbus
+# Install launch files
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+  FILES_MATCHING PATTERN "*.launch.py"
 )
 
+# Install config files
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/config
+)
 
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
-## Mark other files for installation (e.g. launch and bag files, etc.)
-
-
-
-
-install(TARGETS acr_robot_controller
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
-
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-install(DIRECTORY include launch config
-   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-   PATTERN ".svn" EXCLUDE
- )
+ament_package()

@@ -1,85 +1,62 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8)
 project(lower_level_controller)
 
-add_compile_options(-std=c++11)
-add_definitions(-Dlinux)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(anscer_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
-find_package(catkin REQUIRED COMPONENTS
-  
+# Include directories
+include_directories(include)
+
+# Build the executable
+add_executable(lower_level_controller_node
+  src/lower_level_controller_ros2.cpp
+)
+
+ament_target_dependencies(lower_level_controller_node
+  rclcpp
   geometry_msgs
-  roscpp
-  rospy
   std_msgs
-  roslib
-  tf
-  dynamic_reconfigure
   anscer_msgs
-  actionlib 
-  roslib
-  lift_action
-  
+  nav_msgs
+  tf2_geometry_msgs
+  tf2_ros
 )
 
-generate_dynamic_reconfigure_options(cfg/lowerLevelController.cfg)
-
-catkin_package(
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS
-    
-    geometry_msgs
-    roscpp
-    rospy
-    std_msgs
-    actionlib
-    lift_action
+# Install the executable
+install(TARGETS lower_level_controller_node
+  DESTINATION lib/${PROJECT_NAME}
 )
 
-
-###########
-## Build ##
-###########
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-  ${PROJECT_SOURCE_DIR}/include/lower_level_controller
-)
-set(CMAKE_CXX_STANDARD_LIBRARIES)
-
-add_executable(lower_level_controller
-  src/LowerLevelInterface.cpp
-  src/LowerLevelComputations.cpp
-  src/RosClass.cpp
-
-  src/ModbusController.cpp
-  src/ModbusDevice.cpp
-
-#  src/ModbusRoboteqController.cpp
-#src/RoboteqDevice.cpp
-
-#  src/ODriveController.cpp
-#  src/ODriveDevice.cpp
-#  src/CommunicationSerial.cpp
-
-#  src/RainbowController.cpp
-#  src/RainbowDevice.cpp
+# Install headers
+install(DIRECTORY include/
+  DESTINATION include
 )
 
-target_link_libraries(lower_level_controller
-  ${catkin_LIBRARIES}
-  modbus 
+# Install launch files
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+  FILES_MATCHING PATTERN "*.launch.py"
 )
 
-add_dependencies(lower_level_controller ${PROJECT_NAME}_gencfg)
+# Install config files
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/config
+)
 
-## Mark other files for installation (e.g. launch and bag files, etc.)
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-install(DIRECTORY include launch config data cfg
-   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-   PATTERN ".svn" EXCLUDE
- )
- install(TARGETS ${PROJECT_NAME}
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
+ament_package()
