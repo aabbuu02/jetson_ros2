@@ -3,19 +3,20 @@
 <package format="3">
   <name>emergency_handler</name>
   <version>0.0.0</version>
-  <description>The emergency_handler package</description>
-
-  <maintainer email="user@todo.todo">user</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Emergency Handler package</description>
+  <maintainer email="raj@anscer.com">raj</maintainer>
+  <license>TODO</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-
   <depend>rclcpp</depend>
-  <depend>anscer_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>anscer_msgs</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
   </export>
 </package>
-

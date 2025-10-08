@@ -1,90 +1,87 @@
-/**
- * @file robot_pose_publisher.cpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
+/*!
+ * \file robot_pose_publisher.cpp
+ * \brief Publishes the robot's position in a geometry_msgs/Pose message.
+ *
+ * Publishes the robot's position in a geometry_msgs/Pose message based on the TF
+ * difference between /map and /base_link.
+ *
+ * \author Russell Toris - rctoris@wpi.edu
+ * \date April 3, 2014
  */
 
-#include <chrono>
-#include <memory>
-#include <string>
-#include <stdexcept>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Pose.h>
+#include <ros/ros.h>
+#include <tf/transform_listener.h>
 
-#include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
-#include "tf2_ros/buffer.h"
-#include "tf2_ros/transform_listener.h"
-
-using namespace std::chrono_literals;
-
-class RobotPosePublisher : public rclcpp::Node
+/*!
+ * Creates and runs the robot_pose_publisher node.
+ *
+ * \param argc argument count that is passed to ros::init
+ * \param argv arguments that are passed to ros::init
+ * \return EXIT_SUCCESS if the node runs correctly
+ */
+int main(int argc, char ** argv)
 {
-public:
-    explicit RobotPosePublisher(const rclcpp::NodeOptions & options)
-    : Node("robot_pose_publisher", options)
+  // initialize ROS and the node
+  ros::init(argc, argv, "robot_pose_publisher");
+  ros::NodeHandle nh;
+  ros::NodeHandle nh_priv("~");
+
+  // configuring parameters
+  std::string map_frame, base_frame;
+  double publish_frequency;
+  bool is_stamped;
+  ros::Publisher p_pub;
+
+  nh_priv.param<std::string>("map_frame",map_frame,"/map");
+  nh_priv.param<std::string>("base_frame",base_frame,"/base_link");
+  nh_priv.param<double>("publish_frequency",publish_frequency,10);
+  nh_priv.param<bool>("is_stamped", is_stamped, false);
+
+  if(is_stamped)
+    p_pub = nh.advertise<geometry_msgs::PoseStamped>("robot_pose", 1);
+  else 
+    p_pub = nh.advertise<geometry_msgs::Pose>("robot_pose", 1);
+
+  // create the listener
+  tf::TransformListener listener;
+  listener.waitForTransform(map_frame, base_frame, ros::Time(), ros::Duration(1.0));
+
+  ros::Rate rate(publish_frequency);
+  while (nh.ok())
+  {
+    tf::StampedTransform transform;
+    try
     {
-        // Declare and get parameters
-        this->declare_parameter<std::string>("map_frame", "map");
-        this->declare_parameter<std::string>("base_frame", "base_link");
-        this->declare_parameter<double>("publish_frequency", 10.0);
+      listener.lookupTransform(map_frame, base_frame, ros::Time(0), transform);
 
-        map_frame_ = this->get_parameter("map_frame").as_string();
-        base_frame_ = this->get_parameter("base_frame").as_string();
-        double publish_frequency = this->get_parameter("publish_frequency").as_double();
+      // construct a pose message
+      geometry_msgs::PoseStamped pose_stamped;
+      pose_stamped.header.frame_id = map_frame;
+      pose_stamped.header.stamp = ros::Time::now();
 
-        // Initialize TF listener
-        tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
-        tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+      pose_stamped.pose.orientation.x = transform.getRotation().getX();
+      pose_stamped.pose.orientation.y = transform.getRotation().getY();
+      pose_stamped.pose.orientation.z = transform.getRotation().getZ();
+      pose_stamped.pose.orientation.w = transform.getRotation().getW();
 
-        // Initialize publisher
-        publisher_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("robot_pose", 10);
+      pose_stamped.pose.position.x = transform.getOrigin().getX();
+      pose_stamped.pose.position.y = transform.getOrigin().getY();
+      pose_stamped.pose.position.z = transform.getOrigin().getZ();
 
-        // Initialize timer for the main loop
-        timer_ = this->create_wall_timer(
-            std::chrono::duration<double>(1.0 / publish_frequency),
-            std::bind(&RobotPosePublisher::timer_callback, this));
-
-        RCLCPP_INFO(this->get_logger(), "Robot Pose Publisher has been started.");
-        RCLCPP_INFO(this->get_logger(), "Publishing pose from '%s' to '%s' at %.2f Hz.", map_frame_.c_str(), base_frame_.c_str(), publish_frequency);
+      if(is_stamped)
+        p_pub.publish(pose_stamped);
+      else
+        p_pub.publish(pose_stamped.pose);
+    }
+    catch (tf::TransformException &ex)
+    {
+      // just continue on
     }
 
-private:
-    void timer_callback()
-    {
-        geometry_msgs::msg::TransformStamped transform;
-        try {
-            transform = tf_buffer_->lookupTransform(map_frame_, base_frame_, tf2::TimePointZero);
-        } catch (const tf2::TransformException & ex) {
-            RCLCPP_WARN(this->get_logger(), "Could not get transform: %s", ex.what());
-            return;
-        }
+    rate.sleep();
+  }
 
-        auto pose_msg = std::make_unique<geometry_msgs::msg::PoseStamped>();
-        pose_msg->header.stamp = this->get_clock()->now();
-        pose_msg->header.frame_id = map_frame_;
-
-        pose_msg->pose.position.x = transform.transform.translation.x;
-        pose_msg->pose.position.y = transform.transform.translation.y;
-        pose_msg->pose.position.z = transform.transform.translation.z;
-        pose_msg->pose.orientation = transform.transform.rotation;
-
-        publisher_->publish(std::move(pose_msg));
-    }
-
-    std::string map_frame_;
-    std::string base_frame_;
-    std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
-    std::shared_ptr<tf2_ros::TransformListener> tf_listener_{nullptr};
-    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr publisher_;
-    rclcpp::TimerBase::SharedPtr timer_;
-};
-
-int main(int argc, char * argv[])
-{
-    rclcpp::init(argc, argv);
-    rclcpp::NodeOptions options;
-    auto node = std::make_shared<RobotPosePublisher>(options);
-    rclcpp::spin(node);
-    rclcpp::shutdown();
-    return 0;
+  return EXIT_SUCCESS;
 }

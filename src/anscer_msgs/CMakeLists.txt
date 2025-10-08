@@ -1,43 +1,28 @@
 cmake_minimum_required(VERSION 3.8)
 project(anscer_msgs)
 
-# Find necessary ROS 2 packages
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(actionlib_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
 
-# Generate interfaces, ignoring files in 'Old' and 'ToRemove' directories
+# Generate messages
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "action/ACRModule.action"
-  "action/Charge.action"
-  "action/Dock.action"
-  "action/Error.action"
-  "action/Lift.action"
-  "action/Mission.action"
-  "action/Move.action"
-  "action/MultiMap.action"
-  "action/NavigationServer.action"
-  "action/Process.action"
-  "action/Transition.action"
-  "action/Wait.action"
   "msg/ACRControl.msg"
-  "msg/BatteryDB.msg"
-  "msg/BatteryInfo.msg"
   "msg/BatteryState.msg"
-  "msg/BumperState.msg"
+  "msg/Debug.msg"
+  "msg/DockInfo.msg"
   "msg/ChargeInfo.msg"
   "msg/ControllerMode.msg"
-  "msg/Debug.msg"
-  "msg/Delay.msg"
-  "msg/DockInfo.msg"
-  "msg/DockingDebug.msg"
   "msg/Feedback.msg"
   "msg/FieldStatus.msg"
   "msg/Indication.msg"
-  "msg/IndividualProhibition.msg"
-  "msg/Info.msg"
   "msg/KeyValue.msg"
   "msg/KeyValues.msg"
   "msg/MissionData.msg"
@@ -47,86 +32,44 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MotorDiagnosticsArray.msg"
   "msg/MotorFaultFlags.msg"
   "msg/MotorStatusFlags.msg"
-  "msg/Path.msg"
-  "msg/Paths.msg"
   "msg/PGVPose.msg"
-  "msg/Pose.msg"
-  "msg/ProximitySensors.msg"
   "msg/SafetyField.msg"
   "msg/SafetyFields.msg"
-  "msg/SafetyZone.msg"
-  "msg/ScanPoint.msg"
-  "msg/ScanPoints.msg"
-  "msg/Sequence.msg"
-  "msg/StaticLidar.msg"
-  "msg/StaticLidars.msg"
   "msg/Task.msg"
-  "msg/TransitionInfo.msg"
-  "msg/TransitionZones.msg"
-  "msg/Waypoint.msg"
-  "msg/WaypointArray.msg"
-  "msg/WaypointsArray.msg"
-  "msg/ZoneInfo.msg"
-  "msg/ZoneInformation.msg"
   "msg/ZonePoints.msg"
-  "srv/ActivateSonar.srv"
-  "srv/BatteryAnalytics.srv"
+  "msg/ZoneInformation.msg"
   "srv/BatteryManagement.srv"
-  "srv/BoxFilter.srv"
-  "srv/BumperOverride.srv"
-  "srv/Buzzer.srv"
-  "srv/CallMission.srv"
-  "srv/ChargingControl.srv"
   "srv/ChargingOverride.srv"
   "srv/ClearZones.srv"
-  "srv/ConfirmationButton.srv"
-  "srv/DeleteMap.srv"
-  "srv/DeleteWaypoint.srv"
-  "srv/Distance.srv"
-  "srv/Dock.srv"
-  "srv/DynamicFootprint.srv"
-  "srv/EditSequence.srv"
-  "srv/EditWaypoint.srv"
-  "srv/GetMapList.srv"
-  "srv/GetMapName.srv"
-  "srv/GetTransitionZones.srv"
-  "srv/GlobalPath.srv"
-  "srv/GoToPose.srv"
   "srv/HomeLocation.srv"
-  "srv/InitCharging.srv"
-  "srv/LiftControl.srv"
-  "srv/LogCleaning.srv"
-  "srv/MapCrop.srv"
-  "srv/MapReload.srv"
   "srv/MissionAnalytics.srv"
   "srv/NearestNode.srv"
-  "srv/PauseMission.srv"
   "srv/PausingFeedback.srv"
-  "srv/ProhibitionZones.srv"
   "srv/RelayState.srv"
-  "srv/ResumeMission.srv"
   "srv/Safety.srv"
-  "srv/SafetyParam.srv"
   "srv/SafetySwitch.srv"
-  "srv/SafetyZone.srv"
-  "srv/SaveDelay.srv"
-  "srv/SaveMap.srv"
-  "srv/SavePose.srv"
-  "srv/SaveStation.srv"
   "srv/SetZone.srv"
   "srv/ShelfReader.srv"
-  "srv/SystemPower.srv"
   "srv/TripAnalytics.srv"
-  "srv/Undock.srv"
   "srv/UserFeedback.srv"
-  "srv/WaypointPose.srv"
-  "srv/ZoneSpeed.srv"
-  "srv/ZoneValues.srv"
-  
-  # Declare dependencies for these interfaces
-  DEPENDENCIES std_msgs actionlib_msgs geometry_msgs
+  "srv/SafetyZone.srv"
+  "action/ACRModule.action"
+  "action/Charge.action"
+  "action/Error.action"
+  "action/Lift.action"
+  "action/Move.action"
+  "action/Mission.action"
+  "action/Process.action"
+  "action/Wait.action"
+  DEPENDENCIES
+  std_msgs
+  actionlib_msgs
+  geometry_msgs
 )
 
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
 ament_package()
-
-

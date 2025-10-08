@@ -1,12 +1,6 @@
-# Request
-# (empty request or add fields if needed)
-
 ---
-# Response
-graph_msgs/Graph graph
-uint8 result
-
-# Constants for result
 uint8 RESULT_GRAPH_VALID=0
 uint8 RESULT_GRAPH_INVALID=1
 
+graph_msgs/Graph graph
+uint8 result

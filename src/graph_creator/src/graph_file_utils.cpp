@@ -1,34 +1,51 @@
-/**
- * @file graph_file_utils.cpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #include "graph_creator/graph_file_utils.hpp"
-#include <ament_index_cpp/get_package_share_directory.hpp>
 
-namespace graph_creator
-{
-    std::string GraphFileUtils::getGraphFilePath(const std::string& graph_name)
+namespace Graph::File {
+
+    /**
+     * @brief Get the graph file path using either absolute path or a relative package.
+     * For absolute paths, this function checks whether it is a valid absolute path else
+     * a full absolute path with respect to a package is retrieved. 
+     * 
+     * Usage examples are provided below
+     * For absolute path: /path/to/graph.graphml
+     * For relative path: package/path/to/graph.graphml
+     * 
+     * @param in_file_path The input file path either absolute or relative to a package
+     * @param out_file_path The absolute path to graph file
+     * @return true If path was retrieved successfully
+     * @return false If an invalid absolute or relative path was given
+     */
+
+    bool getGraphFilePath(const std::string &in_file_path, std::string &out_file_path)
     {
-        try {
-            std::string package_path = ament_index_cpp::get_package_share_directory("graph_creator");
-            return package_path + "/maps/" + graph_name + ".graphml";
-        } catch (...) {
-            return "";
+        //TODO: An extension check needs to be done
+        out_file_path = "";
+
+        if(in_file_path.size() == 0)
+        {
+            ROS_ERROR_STREAM("The file path provided is empty");
+            return false;
         }
-    }
 
-    bool GraphFileUtils::saveGraphToFile(const std::string& file_path, const Graph::DirectedGraph& graph)
-    {
-        // Implementation for saving graph to file
-        return true;
-    }
+        boost::filesystem::path graph_file_path(in_file_path);
+        if(!graph_file_path.is_absolute())
+        {
+            std::string package_name = graph_file_path.begin()->string();
+            ROS_INFO_STREAM("Retrieving path relative to package: "<<package_name);
+            std::string package_path_str = ros::package::getPath(package_name);
+            if(package_path_str.size() == 0)
+            {
+                ROS_ERROR_STREAM("Could not locate graph relative to package");
+                return false;
+            }
 
-    bool GraphFileUtils::loadGraphFromFile(const std::string& file_path, Graph::DirectedGraph& graph)
-    {
-        // Implementation for loading graph from file
+            boost::filesystem::path package_path(package_path_str);
+            out_file_path = (package_path.parent_path()/graph_file_path).string();
+            return true;
+        }
+       
+        out_file_path = graph_file_path.string();
         return true;
     }
 }

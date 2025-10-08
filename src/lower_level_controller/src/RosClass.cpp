@@ -1,101 +1,244 @@
+#include <ros/console.h> 
+#include "RosClass.h"
+
 /**
- * @file RosClass.cpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
+* @brief  Constructor for the Computations
+*/
+RosClass::RosClass():nhp("~")
+{
+    ROS_INFO("RosClass Constructor called ");
+    
+    nhp.param("controller_type",m_controllerType,1);
+
+    nhp.param<std::string>("cmd_topic", m_cmdVelTopic,"cmd_vel");
+    nhp.param<std::string>("odom_topic", m_odomTopic,"odom");
+    nhp.param<std::string>("emergency_stop_topic",m_emergencyStopTopic,"e_stop");
+    nhp.param<std::string>("emergency_button_topic",m_emergencyButtonTopic,"e_stop/button");
+
+
+    // nhp.param<std::string>("tower_light_topic", m_towerLightTopic, "tower_light/indication");
+
+    /*Subscribers*/
+    cmdVelSub       = nh.subscribe(m_cmdVelTopic.c_str(), 1, & RosClass::cmdVelCallback, this);
+    eStopSub        = nh.subscribe(m_emergencyStopTopic.c_str(), 1, & RosClass::eStopCallback, this);
+    lifterSub       = nh.subscribe("lift_action", 1, & RosClass::lifterCallback, this);
+//    distanceToGoal  =nh.subscribe("disatance_to_goal",1, & RosClass::distancetoGoalCallback,this); 
+
+
+
+
+    /*Publishers*/
+    odomPub         = nh.advertise <nav_msgs::Odometry> (m_odomTopic.c_str(), 1);
+    botShelfPub     = nh.advertise<std_msgs::Int8>("bot_shelf_number", 1);
+    // batteryPub        = nh.advertise <sensor_msgs::BatteryState> ("/bms/battery_state", 1);
+    emergencyPub      = nh.advertise <std_msgs::Bool> (m_emergencyButtonTopic.c_str(), 1);
+
+    /*Timer callback*/
+    heartBeatTimer = nh.createTimer(ros::Duration(1/4), &RosClass::heartBeatTimerCallback, this);
+
+    /*Action server*/
+
+
+    // if(m_controllerType == MODBUS_ROBOTEQ_DEVICE)
+    // {
+    //     motorDiagPub   = nh.advertise <anscer_msgs::MotorDiagnosticsArray> (m_motorDiagnosticsTopic.c_str(), 1);   
+    // }
+
+    /*Services*/
+
+
+   
+}
+
+/**
+* @brief  Destructor for the Computations
+*/
+
+RosClass::~RosClass()
+{
+
+}
+
+void RosClass::lifterCallback(const lift_action::LiftAction &msg)
+{
+  m_lifterData = msg;
+}
+
+void RosClass::heartBeatTimerCallback(const ros::TimerEvent &event)
+{
+  m_heartBeatState = m_heartBeatState == 0 ? 1 : 0;
+}
+
+
+/**
+* @brief  Call back for command velocities for robot
+*/
+void RosClass::cmdVelCallback(const geometry_msgs::Twist &msg)
+{
+    m_cmdVel  = msg;
+} 
+
+/**
+ * @brief callback for distance to goal 
+ *
  */
 
-#include "lower_level_controller/RosClass.h"
-#include <tf2/LinearMath/Quaternion.h>
-#include "geometry_msgs/msg/transform_stamped.hpp"
+//void RosClass::distancetoGoalCallback(const std_msgs::Float32 &msg)
+//{
+//	m_distanceToGoal = msg.data;
+//}
 
-using namespace std::chrono_literals;
-
-RosClass::RosClass(const rclcpp::NodeOptions & options) : Node("lower_level_controller_node", options)
+/**
+* @brief  Call back for emergency stops(UI/Hardware)
+*/
+void RosClass::eStopCallback(const std_msgs::Bool &msg)
 {
-    RCLCPP_INFO(this->get_logger(), "Initializing Lower Level Controller...");
-
-    this->declare_parameter<std::string>("odom_frame", "odom");
-    this->declare_parameter<std::string>("base_frame", "base_link");
-    this->declare_parameter<bool>("publish_tf", true);
-    this->declare_parameter<double>("wheel_radius", 0.085);
-    this->declare_parameter<double>("wheel_separation", 0.42);
-    this->declare_parameter<int>("encoder_cpr", 4096);
-    this->declare_parameter<std::string>("modbus_ip", "192.168.1.10");
-    this->declare_parameter<int>("modbus_port", 502);
-
-    odom_frame_ = this->get_parameter("odom_frame").as_string();
-    base_frame_ = this->get_parameter("base_frame").as_string();
-    publish_tf_ = this->get_parameter("publish_tf").as_bool();
-    double wheel_radius = this->get_parameter("wheel_radius").as_double();
-    double wheel_separation = this->get_parameter("wheel_separation").as_double();
-    int encoder_cpr = this->get_parameter("encoder_cpr").as_int();
-    std::string modbus_ip = this->get_parameter("modbus_ip").as_string();
-    int modbus_port = this->get_parameter("modbus_port").as_int();
-
-    try {
-        modbusController_ = std::make_unique<ModbusController>(modbus_ip, modbus_port, this->get_logger());
-    } catch (const std::runtime_error &e) {
-        RCLCPP_FATAL(this->get_logger(), "Failed to initialize. Shutting down. Error: %s", e.what());
-        rclcpp::shutdown();
-        return;
-    }
-    
-    lowerLevelComputations_ = std::make_unique<LowerLevelComputations>(wheel_radius, wheel_separation, encoder_cpr);
-
-    odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("odom", 10);
-    cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>(
-        "cmd_vel", 10, std::bind(&RosClass::cmdVelCallback, this, std::placeholders::_1));
-    
-    if (publish_tf_) {
-        tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
-    }
-
-    timer_ = this->create_wall_timer(20ms, std::bind(&RosClass::update_loop, this));
-    RCLCPP_INFO(this->get_logger(), "Lower Level Controller initialized successfully.");
+    m_eStop = msg.data;
 }
 
-void RosClass::cmdVelCallback(const geometry_msgs::msg::Twist::SharedPtr msg)
+
+
+
+
+/*Getter Functions*/
+
+/**
+* @brief  Access the robot velocity command
+* @return velocity command to the interface class
+*/
+geometry_msgs::Twist RosClass::getCommandVelocity()
 {
-    auto [left_rpm, right_rpm] = lowerLevelComputations_->twistToRPM(msg->linear.x, msg->angular.z);
-    modbusController_->writeData(10, static_cast<int>(left_rpm)); // Assuming register 10 is left RPM
-    modbusController_->writeData(11, static_cast<int>(right_rpm)); // Assuming register 11 is right RPM
+   if(m_eStop)
+   {
+     m_cmdVel.linear.x  = 0.0;
+     m_cmdVel.angular.z = 0.0;
+   } 
+   return m_cmdVel;
 }
 
-void RosClass::update_loop()
+
+/**
+* @brief  Gets the estop status
+* @return boolean value of estop status
+*/
+bool RosClass::getEStopStatus()
 {
-    long left_encoder = modbusController_->readData(20); // Assuming register 20 is left encoder counts
-    long right_encoder = modbusController_->readData(21); // Assuming register 21 is right encoder counts
+    return m_eStop;
+}
 
-    auto [x, y, theta, vx, vth] = lowerLevelComputations_->updateOdometry(left_encoder, right_encoder, this->get_clock()->now());
 
-    auto now = this->get_clock()->now();
-    nav_msgs::msg::Odometry odom_msg;
-    odom_msg.header.stamp = now;
-    odom_msg.header.frame_id = odom_frame_;
-    odom_msg.child_frame_id = base_frame_;
 
-    odom_msg.pose.pose.position.x = x;
-    odom_msg.pose.pose.position.y = y;
-    tf2::Quaternion q;
-    q.setRPY(0, 0, theta);
-    odom_msg.pose.pose.orientation.x = q.x();
-    odom_msg.pose.pose.orientation.y = q.y();
-    odom_msg.pose.pose.orientation.z = q.z();
-    odom_msg.pose.pose.orientation.w = q.w();
-    odom_msg.twist.twist.linear.x = vx;
-    odom_msg.twist.twist.angular.z = vth;
 
-    odom_pub_->publish(odom_msg);
 
-    if (publish_tf_) {
-        geometry_msgs::msg::TransformStamped tf_msg;
-        tf_msg.header.stamp = now;
-        tf_msg.header.frame_id = odom_frame_;
-        tf_msg.child_frame_id = base_frame_;
-        tf_msg.transform.translation.x = x;
-        tf_msg.transform.translation.y = y;
-        tf_msg.transform.rotation = odom_msg.pose.pose.orientation;
-        tf_broadcaster_->sendTransform(tf_msg);
-    }
+
+/**
+* @brief  Publishing the odometry value for the robot
+* @param odom value computed for the robot
+*/
+void RosClass::sendOdometry(const nav_msgs::Odometry &odom)
+{
+    odomPub.publish(odom);
+}
+
+
+
+/**
+* @brief  Publishing the transformation about odom frame
+* @param odom value computed for the robot
+*/
+void RosClass::updateTF(const nav_msgs::Odometry &odom)
+{
+    geometry_msgs::Pose inputPose;
+    std::string targetFrame           = "/base_footprint";
+    std::string parentFrame           = "/odom_frame";
+    inputPose.position                = odom.pose.pose.position;
+    inputPose.orientation             = odom.pose.pose.orientation; 
+    m_transform.setOrigin(tf::Vector3(inputPose.position.x,inputPose.position.y, 0.0) );
+    m_transform.setRotation(tf::Quaternion(0.0, 0.0, inputPose.orientation.z, inputPose.orientation.w));          
+    m_broadcaster.sendTransform(tf::StampedTransform(m_transform, ros::Time::now(),parentFrame, targetFrame)); 
+}
+
+void RosClass::getWriteParams(writeParameters &value)
+{
+    // value.m_ledMode = m_ledCode;
+    // value.m_buzzerMode = m_buzzerCode;
+    // value.m_frontLidarField = m_frontFieldId;
+    // value.m_rearLidarField = m_rearFieldId;
+    // value.m_liftCommand = m_currentLiftCommand;
+    value.m_heartBeat = m_heartBeatState;
+    // value.m_controllerMode = m_controllerMode;
+    // value.m_relayState = m_relayState;
+    value.m_lifterData = m_lifterData; 
+}
+
+/**
+* @brief  Publishing the read parmaters from the controller
+* @param parameterValue the read parameters in the readParameters structure
+*/
+void RosClass::sendReadParameters(const readParameters &parameterValue)
+{
+  std_msgs::Int8 botShelfMsg;
+  botShelfMsg.data = parameterValue.m_botShelfNo;
+  botShelfPub.publish(botShelfMsg);  
+  //   sensor_msgs::BatteryState battery;
+  //   battery.header.stamp = ros::Time::now();
+  //   battery.voltage = (parameterValue.m_batteryVoltage -20)/10;
+  //   battery.percentage = parameterValue.m_batteryPercentage/100;
+  //   battery.capacity = 72.0;
+  //   battery.design_capacity = 72.0;
+  //   if(battery.percentage > 0.001)
+  //       batteryPub.publish(battery);
+
+
+  //   std_msgs::Bool emergencyState, confirmationState, dockState, frontFieldState, rearFieldState;
+  //   emergencyState.data = parameterValue.m_emergencyFeedback;
+  //   emergencyPub.publish(emergencyState);
+
+  //   std::bitset<16> confirmationRegBits(parameterValue.m_confirmationFeedback);
+
+  //   confirmationState.data = !confirmationRegBits[0];  
+  //   confirmationPub.publish(confirmationState);
+
+  //   if(confirmationState.data != m_currentConfirmState)
+  //   {
+	// ROS_INFO_STREAM("Confirmation button"<<(confirmationState.data ? "pressed" : "released"));
+	// anscer_msgs::UserFeedback userFeedbackSrv;
+	// userFeedbackSrv.request.user_feedback = confirmationState.data;
+	// if(!confirmationClient.call(userFeedbackSrv))
+	//   ROS_ERROR_STREAM("Failed to call user feedback service");
+  //   	m_currentConfirmState = confirmationState.data;	    
+  //   }
+
+  //   std::bitset<16> modeSelectionRegBits(parameterValue.m_modeSelectionFeedback);
+
+  //   std_msgs::Int32 modeSelectionMsg;
+    
+  //   if(modeSelectionRegBits[4]) modeSelectionMsg.data = 1; //Auto mode
+  //   else if (modeSelectionRegBits[5]) modeSelectionMsg.data = 2; //Manual mode
+  //   else modeSelectionMsg.data = 3; //Brake release mode
+
+  //   modePub.publish(modeSelectionMsg);
+    
+  //   dockState.data = parameterValue.m_dockStateFeedback;
+  //   dockStatePub.publish(dockState);
+
+  //   frontFieldState.data = parameterValue.m_frontLidarFeedback;
+  //   frontFieldActPub.publish(frontFieldState);
+
+  //   rearFieldState.data = parameterValue.m_rearLidarFeedback;
+  //   rearFieldActPub.publish(rearFieldState);
+
+
+  //   std_msgs::Int8 valueId = parameterValue.m_locationId;
+  //   if(m_prevLocationId != valueId.data)
+  //   {   
+	// m_prevLocationId = valueId.data;
+  //   	locationIdPub.publish(valueId);
+  //   }
+  //   if (m_controllerType == MODBUS_ROBOTEQ_DEVICE)
+  //   {
+  //       anscer_msgs::MotorDiagnosticsArray motorDiagnosticsArray;
+  //       motorDiagnosticsArray.motor_diagnostics = parameterValue.m_roboteqDiagnosticsFeedback.motor_diagnostics;
+  //       motorDiagPub.publish(motorDiagnosticsArray);
+  //   }
 }

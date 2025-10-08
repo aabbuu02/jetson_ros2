@@ -1,9 +1,14 @@
-string graph_url
+# Either use absolute path to the graph file like /path/to/graph.graphml or
+# use a relative path to a package. For example, package_name/graphs/graph.graphml.
+# In case of graph file being relative to a package, use of '/' is not required.
+string graph_url    # URL of graph resource
 ---
-graph_msgs/Graph graph
-uint8 result
-
-# Constants for result
+# Result code defintions
 uint8 RESULT_SUCCESS=0
 uint8 RESULT_GRAPH_DOES_NOT_EXIST=1
+uint8 RESULT_INVALID_GRAPH_FILE_PATH=2
+uint8 RESULT_UNDEFINED_FAILURE=255
 
+# Returned graph is only valid if result equals RESULT_SUCCESS
+graph_msgs/Graph graph
+uint8 result

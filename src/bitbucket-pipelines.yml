@@ -1,0 +1,26 @@
+
+image: osrf/ros:melodic-desktop-full
+
+pipelines:
+  default:
+    - parallel:
+      - step:
+          name: melodic
+          script:
+           # - apt-get install g++ git autogen autoconf build-essential cmake graphviz \
+            #     libboost-dev libboost-test-dev libgtest-dev libtool \
+             #    python3-sip-dev doxygen python3-sphinx pkg-config \
+              #   python3-sphinx-rtd-theme -y
+            - mkdir serial_dir
+            - cd serial_dir/ && git clone https://github.com/crayzeewulf/libserial.git
+            - cd serial_dir && cd libserial && ./compile.sh
+            - cd serial_dir && cd libserial && cd build && make install 
+            - cd 
+            - mkdir -p /tmp/src/repo && mv `pwd`/* /tmp/src/repo && mv /tmp/src `pwd`  # Move everything into the src directory
+            - source `find /opt/ros -name setup.bash | sort | head -1` && echo $ROS_DISTRO # Source ROS environment
+            - apt-get update && rosdep install --from-paths src --ignore-src -y # Install dependencies missing from the docker image
+            - apt-get install build-essential -y
+            - apt-get install libmodbus-dev -y
+
+            - apt-get install ros-melodic-move-base-msgs
+            - catkin_make --only-pkg-with-deps "anscer_msgs" -j16

@@ -1,10 +1,3 @@
-/**
- * @file ODriveController.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #ifndef ODRIVE_CONTROLLER_H
 #define ODRIVE_CONTROLLER_H
 

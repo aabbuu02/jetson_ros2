@@ -1,4 +1,7 @@
-int32[] current_pos
+# Source and destination IDs
+string goalType
+float64 source_id
+float64 target_id
+
 ---
-string unique_id
-int32[] goal_pos
+string result

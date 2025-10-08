@@ -1,18 +1,19 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
+<package format="2">
   <name>anscer_teleop</name>
-  <version>0.0.1</version>
-  <description>Teleoperation for Anscer robots</description>
-  <maintainer email="abubakarsiddiq@todo.todo">abubakarsiddiq</maintainer>
-  <license>TODO</license>
-
-  <buildtool_depend>ament_python</buildtool_depend>
-
-  <exec_depend>rclpy</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-
-  <export>
-    <build_type>ament_python</build_type>
-  </export>
+  <version>1.2.3</version>
+  <description>
+    Provides teleoperation using keyboard for AMR.
+  </description>
+  <license>BSD</license>
+  <author>Melonee Wise</author>
+  <author email="thlim@robotis.com">Darby Lim</author>
+  <maintainer email="pyo@robotis.com">Pyo</maintainer>
+  <url type="website">http://wiki.ros.org/turtlebot3_teleop</url>
+  <url type="emanual">http://turtlebot3.robotis.com</url>
+  <url type="repository">https://github.com/ROBOTIS-GIT/turtlebot3</url>
+  <url type="bugtracker">https://github.com/ROBOTIS-GIT/turtlebot3/issues</url>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>rospy</depend>
+  <depend>geometry_msgs</depend>
 </package>

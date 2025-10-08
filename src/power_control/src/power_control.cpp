@@ -1,164 +1,372 @@
-/**
- * @file power_control.cpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #include "power_control.hpp"
-#include <unistd.h>
-#include <sys/reboot.h>
-#include <chrono>
 
-using namespace std::chrono_literals;
-
-PowerControl::PowerControl() : Node("power_control_node")
+/**
+ * @brief Construct a new Power Control:: Power Control object
+ * 
+ * @param nh The node handle from the main function
+ */
+PowerControl::PowerControl(ros::NodeHandle &nh):
+    nh(nh), nhp("~")
 {
-    // --- Declare and get parameters ---
-    this->declare_parameter<std::string>("system_name", "master_system");
-    this->declare_parameter<bool>("is_system_master", false);
-    this->declare_parameter<std::vector<std::string>>("slave_system_names", std::vector<std::string>());
-    this->declare_parameter<bool>("enable_system_power_control", false);
-    this->declare_parameter<bool>("enable_slave_power_control", false);
+    getParameters();
 
-    system_name_ = this->get_parameter("system_name").as_string();
-    is_master_system_ = this->get_parameter("is_system_master").as_bool();
-    slave_system_names_ = this->get_parameter("slave_system_names").as_string_array();
-    enable_system_pwr_ctrl_ = this->get_parameter("enable_system_power_control").as_bool();
-    enable_slave_pwr_ctrl_ = this->get_parameter("enable_slave_power_control").as_bool();
+    //Service servers
+    std::stringstream sysTopicStringStream;
+    sysTopicStringStream<<"power_control/"<<(m_isMasterSystem ? "master" : "slave")<<"/"<<m_systemName<<"/";
+    poweroffSrvServer = nh.advertiseService(sysTopicStringStream.str()+"/poweroff", &PowerControl::poweroffSrvCallback, this);
+    rebootSrvServer = nh.advertiseService(sysTopicStringStream.str()+"/reboot", &PowerControl::rebootSrvCallback, this);
 
-    RCLCPP_INFO(this->get_logger(), "System name: %s", system_name_.c_str());
-    if (is_master_system_) {
-        RCLCPP_WARN(this->get_logger(), "Current system is MASTER for power control.");
-        for (const auto& name : slave_system_names_) {
-            RCLCPP_INFO(this->get_logger(), " - Configured slave: %s", name.c_str());
-        }
-    } else {
-        RCLCPP_WARN(this->get_logger(), "Current system is SLAVE for power control.");
-    }
+    //Dynamic reconfigure
+    pwrCtrlCfgCallbackType = boost::bind(&PowerControl::powerControlReconfigCallback, this, _1, _2);
+    pwrCtrlDynCfgServer.setCallback(pwrCtrlCfgCallbackType);
 
-    // --- Create Services ---
-    poweroff_srv_ = this->create_service<std_srvs::srv::Trigger>(
-        "~/poweroff", std::bind(&PowerControl::poweroff_callback, this, std::placeholders::_1, std::placeholders::_2));
-    reboot_srv_ = this->create_service<std_srvs::srv::Trigger>(
-        "~/reboot", std::bind(&PowerControl::reboot_callback, this, std::placeholders::_1, std::placeholders::_2));
+    if(!m_isMasterSystem) return;
 
-    // --- Create Clients if Master ---
-    if (is_master_system_) {
-        for (const auto& slave_name : slave_system_names_) {
-            slave_poweroff_clients_.push_back(
-                this->create_client<std_srvs::srv::Trigger>("/" + slave_name + "/power_control/poweroff"));
-            slave_reboot_clients_.push_back(
-                this->create_client<std_srvs::srv::Trigger>("/" + slave_name + "/power_control/reboot"));
-        }
-    }
-
-    // --- Set up Parameter Callback (replaces dynamic_reconfigure) ---
-    parameter_callback_handle_ = this->add_on_set_parameters_callback(
-        std::bind(&PowerControl::parameters_callback, this, std::placeholders::_1));
-    
-    RCLCPP_INFO(this->get_logger(), "Power Control Node has been started.");
-}
-
-// Service callback for poweroff
-void PowerControl::poweroff_callback(const std::shared_ptr<std_srvs::srv::Trigger::Request>,
-                                     std::shared_ptr<std_srvs::srv::Trigger::Response> response)
-{
-    RCLCPP_WARN(this->get_logger(), "Poweroff service called for %s", system_name_.c_str());
-    execute_system_command("poweroff");
-    response->success = true;
-    response->message = "Powering down " + system_name_;
-}
-
-// Service callback for reboot
-void PowerControl::reboot_callback(const std::shared_ptr<std_srvs::srv::Trigger::Request>,
-                                   std::shared_ptr<std_srvs::srv::Trigger::Response> response)
-{
-    RCLCPP_WARN(this->get_logger(), "Reboot service called for %s", system_name_.c_str());
-    execute_system_command("reboot");
-    response->success = true;
-    response->message = "Rebooting " + system_name_;
-}
-
-// Main logic for executing commands
-void PowerControl::execute_system_command(const std::string& command_type)
-{
-    if (is_master_system_) {
-        if (!call_slave_services(command_type)) {
-            RCLCPP_ERROR(this->get_logger(), "%s of slave systems failed. Aborting master %s.", command_type.c_str(), command_type.c_str());
-            return;
-        }
-    }
-
-    if (enable_system_pwr_ctrl_) {
-        RCLCPP_WARN(this->get_logger(), "Executing %s on system %s NOW.", command_type.c_str(), system_name_.c_str());
-        sync(); // Commit changes to disk
-        if (command_type == "poweroff") {
-            system("sudo poweroff");
-        } else if (command_type == "reboot") {
-            system("sudo reboot");
-        }
-    } else {
-        RCLCPP_WARN(this->get_logger(), "System power control is disabled. Cannot %s %s.", command_type.c_str(), system_name_.c_str());
-    }
-}
-
-// Helper to call all slave services
-bool PowerControl::call_slave_services(const std::string& service_type)
-{
-    if (!enable_slave_pwr_ctrl_) {
-        RCLCPP_WARN(this->get_logger(), "Slave power control is disabled. Skipping slave commands.");
-        return true;
-    }
-
-    auto& clients = (service_type == "poweroff") ? slave_poweroff_clients_ : slave_reboot_clients_;
-    RCLCPP_INFO(this->get_logger(), "Calling %s service on %zu slaves...", service_type.c_str(), clients.size());
-
-    for (auto& client : clients) {
-        if (!client->wait_for_service(1s)) {
-            RCLCPP_ERROR(this->get_logger(), "Service %s not available.", client->get_service_name());
-            return false;
-        }
-        auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-        auto future = client->async_send_request(request);
+    //Service clients
+    for(size_t i = 0; i < m_slaveSystemNames.size(); ++i)
+    {
+        std::stringstream slaveTopicStringStream;
+        slaveTopicStringStream<<"power_control/slave/"<<m_slaveSystemNames.at(i)<<"/";
         
-        // Wait for the result
-        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) != rclcpp::FutureReturnCode::SUCCESS)
-        {
-            RCLCPP_ERROR(this->get_logger(), "Failed to call service %s", client->get_service_name());
-            return false;
+        ros::ServiceClient client;
+
+        //For poweroff service clients
+        client = nh.serviceClient<std_srvs::Trigger>(slaveTopicStringStream.str()+"/poweroff");
+        slavePowerOffSrvClients.push_back(client);
+
+        //For reboot service clients
+        client = nh.serviceClient<std_srvs::Trigger>(slaveTopicStringStream.str()+"/reboot");
+        slaveRebootSrvClients.push_back(client);
+    }
+
+    waitForServices();
+}
+
+/**
+ * @brief Get the parameters from the ROS parameters server
+ * 
+ */
+void PowerControl::getParameters()
+{
+    //Current system settings
+    nhp.param<std::string>("system_name", m_systemName, "master_system");
+    nhp.param("is_system_master", m_isMasterSystem, false);
+
+    ROS_INFO_STREAM("System name: "<<m_systemName);
+
+    if(!m_isMasterSystem) 
+    {
+        ROS_WARN_STREAM("Current system is set to be slave for power control! Slave(s) configuration will be ignored.");
+        return;
+    }
+
+    ROS_WARN_STREAM("Current system is set to be master for power control");
+
+    // Slave settings
+
+    if(!nhp.hasParam("slave_system_names"))
+    {
+        ROS_WARN_STREAM("No slave systems are configured. This warning can be ignored if it was intentional");
+        return;
+    }
+
+    XmlRpc::XmlRpcValue symbol;
+    if(!nhp.getParam("slave_system_names", symbol))
+    {
+        ROS_ERROR_STREAM("Failed to read slave system names from parameters server");
+        return;
+    }
+
+    if(symbol.getType() == XmlRpc::XmlRpcValue::TypeArray)
+    {
+        ROS_INFO_STREAM("Configured slave system(s):");
+        for(size_t i = 0; i < symbol.size(); ++i)
+        {   
+            
+            m_slaveSystemNames.push_back(symbol[i]);
+            ROS_INFO_STREAM(i<<": "<<m_slaveSystemNames.at(i));
         }
     }
-    
-    RCLCPP_INFO(this->get_logger(), "All slave services called successfully.");
+    else
+    {
+        ROS_ERROR_STREAM("Cannot read slave system names as it is not specified in an array");
+    }
+
+    nhp.param("enable_system_power_control", m_enableSystemPwrCtrl, false);
+    nhp.param("enable_slave_power_control", m_enableSlavePwrCtrl, false);
+
+    ROS_INFO_STREAM("Enable current systems power control: "<<std::boolalpha<<m_enableSystemPwrCtrl);
+    ROS_INFO_STREAM("Enable slave system(s) power control: "<<std::boolalpha<<m_enableSlavePwrCtrl);
+}
+
+/**
+ * @brief Wait for the slave system(s) poweroff and reboot ROS servicess 
+ * 
+ */
+void PowerControl::waitForServices() 
+{
+    if(slavePowerOffSrvClients.size() == 0) return;
+
+    ROS_INFO_STREAM("Waiting for required slave system power control services");
+    for(size_t i = 0; i < slavePowerOffSrvClients.size(); ++i)
+    {
+        slavePowerOffSrvClients.at(i).waitForExistence();
+        slaveRebootSrvClients.at(i).waitForExistence();
+    }
+    ROS_INFO_STREAM("Required slave power control services are now available!");
+}
+
+/**
+ * @brief The main run method to execute the slave's poweroff and reboot service calls along with
+ * the current systems poweroff and reboot
+ * 
+ */
+void PowerControl::run()
+{
+    ros::Rate rate(5.0f);
+
+    while(ros::ok)
+    {
+        switch(m_powerCtrlCmd)
+        {
+            case WAIT: break;
+
+            case POWEROFF:
+            {
+                if(poweroffSlaveSystems())
+                {
+                    ROS_WARN_STREAM("Powering down system "<<m_systemName);
+                    powerOffSystem();
+                }
+                else
+                {
+                    ROS_ERROR_STREAM("Powering down of slave systems failed");
+                }
+
+                m_powerCtrlCmd = WAIT;
+                
+                break;
+            }
+
+            case REBOOT:
+            {
+                if(rebootSlaveSystems())
+                {
+                    ROS_WARN_STREAM("Rebooting system"<<m_systemName);
+                    rebootSystem();
+                }
+                else
+                {
+                    ROS_ERROR_STREAM("Rebooting of slave systems failed");
+                }
+
+                m_powerCtrlCmd = WAIT;
+                
+                break;
+            }
+
+            default: 
+            {
+                ROS_ERROR_STREAM_THROTTLE(1, "Unknown power control command"); 
+                break;
+            }
+        }
+        
+        ros::spinOnce();
+        rate.sleep();
+    }
+}
+
+/**
+ * @brief Poweroff service call used in master and slave mode
+ * 
+ * @param req Trigger request
+ * @param res Trigger response
+ * @return true If the serive was executed successfully
+ */
+bool PowerControl::poweroffSrvCallback(std_srvs::TriggerRequest &req, std_srvs::TriggerResponse &res)
+{
+    ROS_WARN_STREAM("Poweroff "<<m_systemName<<" system service called");
+
+    m_powerCtrlCmd = POWEROFF;
+
+    res.success = true;
+    res.message = "Powering down "+m_systemName;
+
     return true;
 }
 
-// Parameter callback (replaces dynamic_reconfigure)
-rcl_interfaces::msg::SetParametersResult PowerControl::parameters_callback(
-    const std::vector<rclcpp::Parameter> &parameters)
+/**
+ * @brief Reboot service call used in master and slave mode
+ * 
+ * @param req Trigger request
+ * @param res Trigger response
+ * @return true If the service was executed successfully
+ */
+bool PowerControl::rebootSrvCallback(std_srvs::TriggerRequest &req, std_srvs::TriggerResponse &res)
 {
-    rcl_interfaces::msg::SetParametersResult result;
-    result.successful = true;
-    for (const auto &param : parameters) {
-        if (param.get_name() == "enable_system_power_control") {
-            enable_system_pwr_ctrl_ = param.as_bool();
-            RCLCPP_INFO(this->get_logger(), "Parameter 'enable_system_power_control' updated to: %s", enable_system_pwr_ctrl_ ? "true" : "false");
+    ROS_WARN_STREAM("Reboot "<<m_systemName<<"system service called");
+
+    m_powerCtrlCmd = REBOOT;
+
+    res.success = true;
+    res.message = "Rebooting "+m_systemName;
+    return true;
+}
+
+/**
+ * @brief To poweroff the current system
+ * 
+ * @return true If power off was successful or if it was not enabled
+ * @return false If system power off failed
+ */
+bool PowerControl::powerOffSystem()
+{
+    if(!m_enableSystemPwrCtrl)
+    {
+        ROS_WARN_STREAM(m_systemName<<" cannot be powered off as system power control is disabled");
+        return true;
+    }
+
+    sync(); //Prevent data loss by commiting changes to disk
+    
+    int retVal = system("sudo poweroff");
+
+    if(retVal < 0)
+    {
+        ROS_ERROR_STREAM("System poweroff failed with error: "<<std::strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief To reboot the current system
+ * 
+ * @return true If reboot was successful or if it was not enabled
+ * @return false If system reboot failed
+ */
+bool PowerControl::rebootSystem()
+{
+    if(!m_enableSystemPwrCtrl)
+    {
+        ROS_WARN_STREAM(m_systemName<<" cannot be rebooted as system power control is disabled");
+        return true;
+    }
+
+    sync(); //Prevent data loss by commiting changes to disk
+	
+    int retVal = system("sudo reboot");
+
+    if(retVal < 0)
+    {
+        ROS_ERROR_STREAM("System reboot failed with error: "<<std::strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Function to poweroff slave system(s) by making ROS service calls to them
+ * 
+ * @return true If all service calls to slave(s) were made successfully
+ * @return false If any of the service calls to slave(s) failed
+ */
+bool PowerControl::poweroffSlaveSystems()
+{
+    if(!m_isMasterSystem) return true;
+
+    if(!m_enableSlavePwrCtrl)
+    {
+        ROS_WARN_STREAM("Slave poweroff cannot be done as slave power control is disabled");
+        return true;
+    }
+
+    std_srvs::Trigger poweroffTrigger;
+
+    bool slave_poweroffs_done = true;
+    for(size_t i = 0; i < slavePowerOffSrvClients.size(); ++i)
+    {
+        if(!slavePowerOffSrvClients.at(i).call(poweroffTrigger))
+        {
+            ROS_ERROR_STREAM("Slave system poweroff failed for "<<m_slaveSystemNames.at(i));
+            slave_poweroffs_done = false;
         }
-        if (param.get_name() == "enable_slave_power_control") {
-            enable_slave_pwr_ctrl_ = param.as_bool();
-            RCLCPP_INFO(this->get_logger(), "Parameter 'enable_slave_power_control' updated to: %s", enable_slave_pwr_ctrl_ ? "true" : "false");
+        else
+        {
+            ROS_WARN_STREAM(poweroffTrigger.response.message);
         }
     }
-    return result;
+
+    return slave_poweroffs_done;
 }
 
-int main(int argc, char **argv)
+/**
+ * @brief Function to reboot slave system(s) by making ROS service calls to them
+ * 
+ * @return true If all service calls to slave(s) were made successfully
+ * @return false If any of the service calls to slave(s) failed
+ */
+bool PowerControl::rebootSlaveSystems()
 {
-    rclcpp::init(argc, argv);
-    auto node = std::make_shared<PowerControl>();
-    rclcpp::spin(node);
-    rclcpp::shutdown();
-    return 0;
+    if(!m_isMasterSystem) return true;
+
+    if(!m_enableSlavePwrCtrl)
+    {
+        ROS_WARN_STREAM("Slave reboot cannot be done as slave power control is disabled");
+        return true;
+    }
+
+    std_srvs::Trigger rebootTrigger;
+
+    bool slave_reboots_done = true;
+    for(size_t i = 0; i < slaveRebootSrvClients.size(); ++i)
+    {
+        if(!slaveRebootSrvClients.at(i).call(rebootTrigger))
+        {
+            ROS_ERROR_STREAM("Slave system reboot failed for "<<m_slaveSystemNames.at(i));
+            slave_reboots_done = false;
+        }
+        else
+        {
+            ROS_WARN_STREAM(rebootTrigger.response.message);
+        }
+    }
+
+    return slave_reboots_done;
 }
 
+/**
+ * @brief Node's reconfigure call back
+ * 
+ * @param config The available configurations
+ * @param level The level value used to set value in sections
+ */
+void PowerControl::powerControlReconfigCallback(power_control::PowerControlConfig &config, uint32_t level)
+{
+    m_enableSystemPwrCtrl = config.enable_system_power_control;
+    m_enableSlavePwrCtrl = config.enable_slave_power_control;
+
+    ROS_INFO_STREAM("System power control set to: "<<std::boolalpha<<m_enableSystemPwrCtrl);
+    ROS_INFO_STREAM("Slave power control set to: "<<std::boolalpha<<m_enableSlavePwrCtrl);
+}
+
+/**
+ * @brief The main entry point for the power control node
+ * 
+ * @param argc Only used for ROS commands
+ * @param argv Only used for ROS commands
+ * @return int Returns 0 on successful exit
+ */
+int main(int argc, char** argv)
+{
+    ros::init(argc, argv, "power_control");
+    ros::NodeHandle nh;
+
+    PowerControl powerControl(nh);
+    powerControl.run();
+
+    return EXIT_SUCCESS;
+}

@@ -1,1 +1,1 @@
-anscer_msgs/Waypoint[] waypoints
+anscer_msgs/Waypoint[] Waypoints

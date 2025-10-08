@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="navigation_speed_control" type="navigation_speed_control" respawn="false" name="navigation_speed_control" output="screen">
+    <rosparam command="load" file="$(find navigation_speed_control)/config/navigation_speed_control.yaml"/>
+  </node>
+
+</launch>	

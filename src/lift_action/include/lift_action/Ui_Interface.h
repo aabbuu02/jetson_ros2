@@ -1,29 +1,58 @@
 /**
- * @file Ui_Interface.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
+ * @file UIInterface.h
+ * @author Jishnu (jishnur@anscer.com)
+ * @brief interfacing UI for the ACR
+ * @version 0.1
+ * @date 2022-10-25
+ * @copyright Copyright (c) 2022
  */
+#ifndef UI_INTERFACE
+#define UI_INTERFACE
 
-#ifndef UI_INTERFACE_H
-#define UI_INTERFACE_H
+/**
+ * @brief include header files
+*/
+#include "ModbusCommunicator.h"
+#include "std_msgs/Bool.h"
+#include "lift_action/UI_Interface.h"
+#include "lift_action/Homing_status.h"
+#include "lift_action/Home_sensor.h"
+#include "ros/ros.h"
 
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/bool.hpp>
-#include "lift_action/ModbusCommunicator.h"
-#include <memory>
+class UIInterface
+{
+    private:
+        std::string m_packageName;
+        ros::NodeHandle nh;
+        ModbusCommunicator *p_modbusCommunicatorPtr;
 
-class UIInterface {
-public:
-    UIInterface(rclcpp::Node* parent_node, std::shared_ptr<ModbusCommunicator> mcPtr);
-    ~UIInterface();
+    public:
+        UIInterface(ModbusCommunicator *mcPtr);
+        ~UIInterface();
+        
+        lift_action::UI_Interface m_liftMsg;
 
-private:
-    void cycleResetCallback(const std_msgs::msg::Bool::SharedPtr msg);
-    void homingButtonCallback(const std_msgs::msg::Bool::SharedPtr msg);
-    std::shared_ptr<ModbusCommunicator> p_modbusCommunicatorPtr;
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr cycleResetDataSubscriber;
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr homingButtonSubscriber;
-};
+        /**
+         * @breif callback functions declarations
+        */
+        void eStopCallback(const std_msgs::Bool &msg);
+        void homingCallback(const lift_action::UI_Interface &msg);
+        void cycleResetCallback(const std_msgs::Bool &msg);
+	void homingButtonCallback(const std_msgs::Bool &msg);
 
-#endif // UI_INTERFACE_H
+        int homingControl(lift_action::UI_Interface homingMsg);
+
+        ros::Subscriber eStopDataSubscriber;
+        ros::Subscriber homingDataSubscriber;
+        ros::Subscriber cycleResetDataSubscriber;
+        ros::Subscriber homingButtonSubscriber;
+        ros::Publisher  homingStatusPublisher;
+
+
+        lift_action::UI_Interface m_homingMsg;
+        lift_action::Homing_status m_homingStatus;
+        
+    
+
+};    
+#endif        

@@ -1,35 +1,71 @@
-/**
- * @file navigation_speed_control.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #ifndef NAVIGATION_SPEED_CONTROL_H
 #define NAVIGATION_SPEED_CONTROL_H
 
-#include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/twist.hpp"
-#include "nav_msgs/msg/path.hpp"
+#include <iostream>
+#include <ros/ros.h>
+#include <ros/package.h>
+#include <string>
+#include <vector>
 
-class NavigationSpeedControl : public rclcpp::Node
+#include <geometry_msgs/Twist.h>
+#include <std_msgs/Int32.h>
+
+#include <dynamic_reconfigure/DoubleParameter.h>
+#include <dynamic_reconfigure/Reconfigure.h>
+#include <dynamic_reconfigure/Config.h>
+
+#include "anscer_msgs/FieldStatus.h"
+#include "anscer_msgs/ZoneInformation.h"
+
+using namespace std;
+
+
+constexpr int AUTO_MODE = 1;
+
+/**
+* @class NavigationSpeedControl
+* @brief Controls the speed from teb/dwa based on the feedback from the LiDAR
+*/
+
+class NavigationSpeedControl
 {
 public:
-    explicit NavigationSpeedControl(const rclcpp::NodeOptions & options);
+    NavigationSpeedControl();
+
+    ~NavigationSpeedControl();
 
 private:
-    void cmdVelCallback(const geometry_msgs::msg::Twist::SharedPtr msg);
-    void pathCallback(const nav_msgs::msg::Path::SharedPtr msg);
+    ros::NodeHandle nh;
+    ros::NodeHandle nhp;
+    ros::Subscriber fieldSub;
+    ros::Subscriber cmdVelSub;
+    ros::Subscriber zoneInfoSub;
 
-    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr m_vel_pub;
-    rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr m_vel_sub;
-    rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr m_path_sub;
+    ros::Subscriber selectorSub;
+    ros::Publisher cmdVelPub;
 
-    double m_max_linear_vel;
-    double m_min_linear_vel;
-    double m_max_angular_vel;
-    double m_min_angular_vel;
-    double m_final_dist;
+
+    /*Member functions*/
+    void fieldCallback(const anscer_msgs::FieldStatus &msg);
+    void reconfigureParameters(bool warningStatus);
+    void selectorSwitchCallback(const std_msgs::Int32 &msg);
+    void preNavigateCallback(const geometry_msgs::Twist &msg);
+    void zoneInfoCallback(const anscer_msgs::ZoneInformation &msg);
+
+    void initializeParameters();
+    /*Member variables*/
+
+    bool m_warningPreviousStatus = false;
+    bool m_warningCurrentStatus = false;
+    double m_linearVel__m_s,m_reverseVel__m_s;
+    double m_speedFactor;
+    double m_zoneSpeedFactor = 1.0;
+    int m_selectorSwitchStatus;
+    std::string m_controllerMaxVelocityParam,m_controllerReversedVelocityParam;
+    std::string m_fieldTopic,m_preNavigationTopic,m_navigationTopic,m_selectorSwitchTopic,m_zoneInfoTopic;
+    std::string m_controller;
+
+    /*This is an strucure which implements the  operator overloading */
+
 };
-
-#endif // NAVIGATION_SPEED_CONTROL_H
+#endif

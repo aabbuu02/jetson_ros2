@@ -1,54 +1,147 @@
 /**
- * @file ModbusComunicator.cpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
+ * @file PlcCommunicator
+ * @author Jishnu (jishnu@anscer.com)
+ * @brief communication node used for communicating between two  PLC s using modbus protocol
+ *
+ * @version 0.1
+ * @date 2022-07-23
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+/**
+ * @brief include headerfiles
+ */
+#include "brake_action/ModbusCommunicator.h"
+
+/**
+ * @brief constructor definition
+ * 
  */
 
-#include "brake_action/ModbusCommunicator.h"
-#include <cerrno>
-#include <cstring>
-#include <iostream>
+ModbusCommunicator::ModbusCommunicator()
+{
+    ROS_INFO("ModbusCommunicator constructor called");
+    m_parameterExistanceFlag=checkParameters();
+    if(m_parameterExistanceFlag==0)
+    {
+        ROS_ERROR("failed to load parameters");
+        
+        exit(0);
+    }
+    else
+    {
+        int feedback=readParameters();
+        if(feedback==0)
+        {
+            ROS_ERROR("failed to load Modbus Communicator parameters");
+            
+            exit(0);
+        }
+        else
+        {
+          ROS_INFO("Modbus Communicator parameters read successfully");
 
-ModbusCommunicator::ModbusCommunicator() : m_modbus_context(nullptr) {}
-
+          initiateConnection();
+        }
+    }
+}
+/**
+ * @brief Destroy the Modbus Commuinicator:: Modbus Communicator object
+ * 
+ */
 ModbusCommunicator::~ModbusCommunicator()
 {
-    if (m_modbus_context) {
-        modbus_close(m_modbus_context);
-        modbus_free(m_modbus_context);
-    }
+
 }
 
-int ModbusCommunicator::initiateConnection(const std::string& ip, int port)
+/**
+ * @brief for checking the availability of parameters
+ * @brief returns true if all the parameters exists or return false
+ */
+
+bool ModbusCommunicator::checkParameters()
 {
-    m_modbus_context = modbus_new_tcp(ip.c_str(), port);
-    if (m_modbus_context == NULL) {
-        std::cerr << "Unable to create libmodbus context" << std::endl;
-        return -1;
-    }
+  ROS_INFO("checking existance of parameters");
+  if(nh.hasParam("/ModbusCommunicator/ip")!=1)
+  {
+    ROS_WARN("ip param misssing");
+    return 0;
+  }
+ 
+else  if(nh.hasParam("/ModbusCommunicator/port")!=1)
+  {
+    ROS_WARN("port param misssing");
+    return 0;
+  }
 
-    if (modbus_connect(m_modbus_context) == -1) {
-        std::cerr << "Modbus connection failed: " << modbus_strerror(errno) << std::endl;
-        modbus_free(m_modbus_context);
-        m_modbus_context = nullptr;
-        return -1;
-    }
 
-    return 0; // Success
-}
-
-int ModbusCommunicator::writeData(int address, int value)
-{
-    if (!m_modbus_context) {
-        return -1; // Not connected
-    }
-
-    uint16_t value_to_write = static_cast<uint16_t>(value);
-    if (modbus_write_register(m_modbus_context, address, value_to_write) == -1) {
-        std::cerr << "Modbus write failed: " << modbus_strerror(errno) << std::endl;
-        return -1; // Write failed
-    }
+else
+  {
+    ROS_INFO("Parameter availability checking completed");
+    return 1;
     
-    return 0; // Success
+  }
 }
+
+/**
+ * @brief read parameter definition
+ * @brief for reading parameters from config file
+ */
+int ModbusCommunicator::readParameters()
+{
+
+  ROS_INFO("reading_parameters");
+  
+  nh.getParam("/ModbusCommunicator/ip", m_ipAddress);
+  nh.getParam("/ModbusCommunicator/port",m_port);
+ 
+
+}
+/**
+ * @brief initiateConnection definition
+ * 
+ */
+int ModbusCommunicator::initiateConnection()
+{
+  m_ip=m_ipAddress.c_str();
+  ROS_INFO(m_ip);
+  ROS_INFO("%d",m_port);
+    p_ptx=modbus_new_tcp(m_ip,m_port);
+
+    if(modbus_connect(p_ptx)==-1)
+    {
+        ROS_INFO("connecting modbus device");
+        ROS_ERROR("Modbus Connection failed with am error code %s",modbus_strerror(errno));
+        modbus_free(p_ptx);
+        return -1;
+        exit(0);
+    }
+    else
+    {
+        ROS_INFO("Modbus device connected Successfully");
+    }
+}
+
+
+
+/**
+ * @brief writeData definition
+ * @arguements register number
+ */
+int ModbusCommunicator::writeDataToRegister(int registorNumber,uint32_t data)
+{
+    
+    if(modbus_write_register(p_ptx,registorNumber,data)==-1)
+    {
+        ROS_ERROR("failed to write data in to register number %d with an error number %s",registorNumber,modbus_strerror(errno));
+        modbus_free(p_ptx);
+        return -1;
+    }
+    else
+    {
+      ROS_INFO("written to %d value %d",registorNumber,data);
+    }
+    return 0;
+}
+

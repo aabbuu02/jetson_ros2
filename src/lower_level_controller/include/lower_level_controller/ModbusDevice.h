@@ -1,26 +1,39 @@
-/**
- * @file ModbusDevice.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
+#ifndef MODBUS_DEVICE_H
+#define MODBUS_DEVICE_H
 
-#ifndef MODBUSDEVICE_H
-#define MODBUSDEVICE_H
+#include <ros/ros.h>
+#include <ros/time.h>
 
-#include <modbus.h>
-#include <string>
-#include "rclcpp/rclcpp.hpp"
+
+#include <iostream>
+#include <modbus/modbus.h>
+
+
+
+#define READREGISTERNUMBER 100
+#define STARTINGINDEX 100           /*Offset register index from which writing starts*/
+#define WRITEREGISTERNUMBER 100
 
 class ModbusDevice
 {
+
 public:
-    ModbusDevice(const std::string& ip_address, int port, rclcpp::Logger logger);
-    ~ModbusDevice();
-    int readRegister(int addr);
-    bool writeRegister(int addr, int value);
+    /*Member Functions*/
+    void connectToDevice(const std::string &ipAddress, int port);
+    void readRegister();
+    void writeRegister(int reg_add, int value);
+    void writeRegisters(int addr, int nb, uint16_t data[]);
+    uint32_t readEncoder(int encoder_num);
+    uint16_t m_registerData[READREGISTERNUMBER];
+
 private:
-    modbus_t *ctx_;
-    rclcpp::Logger logger_;
+    /*Member Functions*/
+
+    /*Member variables*/
+
+    int m_port;
+    std::string m_ipAddress;    
+    modbus_t *plc;
 };
-#endif //MODBUSDEVICE_H
+
+#endif

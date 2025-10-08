@@ -1,43 +1,62 @@
 cmake_minimum_required(VERSION 3.8)
 project(acr_robot_controller)
 
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(nav_msgs REQUIRED)
-find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(anscer_msgs REQUIRED)
-find_package(tf2_ros REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
-# Build a single executable from our one, self-contained source file.
-add_executable(acr_robot_controller_node src/acr_robot_controller_node.cpp)
+# Include directories
+include_directories(include)
 
-# Add dependencies on other ROS 2 packages
-ament_target_dependencies(acr_robot_controller_node
-  rclcpp
-  std_msgs
-  geometry_msgs
-  nav_msgs
-  sensor_msgs
-  anscer_msgs
-  tf2_ros
-  tf2_geometry_msgs
+# Build the executable
+add_executable(acr_robot_controller_node
+  src/acr_robot_controller_ros2.cpp
 )
 
-# Install the final executable
-install(TARGETS
-  acr_robot_controller_node
+ament_target_dependencies(acr_robot_controller_node
+  rclcpp
+  geometry_msgs
+  std_msgs
+  anscer_msgs
+  sensor_msgs
+  tf2_geometry_msgs
+  tf2_ros
+)
+
+# Install the executable
+install(TARGETS acr_robot_controller_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Install other necessary files
-install(
-  DIRECTORY launch config udev
-  DESTINATION share/${PROJECT_NAME}
+# Install headers
+install(DIRECTORY include/
+  DESTINATION include
 )
 
+# Install launch files
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+  FILES_MATCHING PATTERN "*.launch.py"
+)
+
+# Install config files
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/config
+)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
 ament_package()
-
-

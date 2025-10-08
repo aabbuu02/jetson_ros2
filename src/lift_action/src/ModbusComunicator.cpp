@@ -1,164 +1,234 @@
 /**
- * @file ModbusComunicator.cpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
+ * @file PlcCommunicator
+ * @author Jishnu (jishnu@anscer.com)
+ * @brief communication node used for communicating between two  PLC s using modbus protocol
+ *
+ * @version 0.1
+ * @date 2022-07-23
+ * 
+ * @copyright Copyright (c) 2022
+ * 
  */
-
+/**
+ * @brief include headerfiles
+ */
 #include "lift_action/ModbusCommunicator.h"
-#include <unistd.h> // For sleep()
 
 /**
- * @brief Constructor: Initializes the ROS 2 node and starts the connection process.
+ * @brief constructor definition
+ * 
  */
-ModbusCommunicator::ModbusCommunicator(const rclcpp::NodeOptions & options)
-    : Node("modbus_communicator_node", options)
+
+ModbusCommunicator::ModbusCommunicator()
 {
-    RCLCPP_INFO(this->get_logger(), "ModbusCommunicator constructor called");
-    this->readParameters();
-    this->initiateConnection();
-}
-
-/**
- * @brief Destructor
- */
-ModbusCommunicator::~ModbusCommunicator()
-{
-    if (p_ptx) {
-        modbus_close(p_ptx);
-        modbus_free(p_ptx);
-    }
-}
-
-/**
- * @brief Declares and reads parameters from the ROS 2 parameter server.
- */
-void ModbusCommunicator::readParameters()
-{
-    RCLCPP_INFO(this->get_logger(), "Reading parameters");
-    // Declare parameters with default values
-    this->declare_parameter<std::string>("ip", "192.168.1.10");
-    this->declare_parameter<int>("port", 502);
-
-    // Get parameters
-    this->get_parameter("ip", m_ipAddress);
-    this->get_parameter("port", m_port);
-
-    RCLCPP_INFO(this->get_logger(), "Parameters read successfully: IP=%s, Port=%d", m_ipAddress.c_str(), m_port);
-}
-
-/**
- * @brief Initiates the connection to the Modbus device.
- */
-void ModbusCommunicator::initiateConnection()
-{
-    m_ip = m_ipAddress.c_str();
-    p_ptx = modbus_new_tcp(m_ip, m_port);
-
-    RCLCPP_INFO(this->get_logger(), "Attempting to connect to Modbus device at %s:%d...", m_ip, m_port);
-    
-    sleep(5); 
-
-    if (modbus_connect(p_ptx) == -1)
+    ROS_INFO("ModbusCommunicator constructor called");
+    m_parameterExistanceFlag=checkParameters();
+    if(m_parameterExistanceFlag==0)
     {
-        RCLCPP_ERROR(this->get_logger(), "Modbus Connection failed: %s", modbus_strerror(errno));
-        modbus_free(p_ptx);
-        throw std::runtime_error("Failed to connect to Modbus device.");
+        ROS_ERROR("failed to load parameters");
+        
+        exit(0);
     }
     else
     {
-        RCLCPP_INFO(this->get_logger(), "Modbus device connected successfully");
+        int feedback=readParameters();
+        if(feedback==0)
+        {
+            ROS_ERROR("failed to load Modbus Communicator parameters");
+            
+            exit(0);
+        }
+        else
+        {
+          ROS_INFO("Modbus Communicator parameters read successfully");
+
+          initiateConnection();
+        }
+    }
+}
+/**
+ * @brief Destroy the Modbus Commuinicator:: Modbus Communicator object
+ * 
+ */
+ModbusCommunicator::~ModbusCommunicator()
+{
+
+}
+
+/**
+ * @brief for checking the availability of parameters
+ * @brief returns true if all the parameters exists or return false
+ */
+
+bool ModbusCommunicator::checkParameters()
+{
+  ROS_INFO("checking existance of parameters");
+  if(nh.hasParam("/ModbusCommunicator/ip")!=1)
+  {
+    ROS_WARN("ip param misssing");
+    return 0;
+  }
+ 
+else  if(nh.hasParam("/ModbusCommunicator/port")!=1)
+  {
+    ROS_WARN("port param misssing");
+    return 0;
+  }
+
+
+else
+  {
+    ROS_INFO("Parameter availability checking completed");
+    return 1;
+    
+  }
+}
+
+/**
+ * @brief read parameter definition
+ * @brief for reading parameters from config file
+ */
+int ModbusCommunicator::readParameters()
+{
+
+  ROS_INFO("reading_parameters");
+  
+  nh.getParam("/ModbusCommunicator/ip", m_ipAddress);
+  nh.getParam("/ModbusCommunicator/port",m_port);
+  
+  return 1;
+}
+/**
+ * @brief initiateConnection definition
+ * 
+ */
+int ModbusCommunicator::initiateConnection()
+{
+  m_ip=m_ipAddress.c_str();
+  ROS_INFO(m_ip);
+  ROS_INFO("%d",m_port);
+  p_ptx=modbus_new_tcp(m_ip,m_port);
+  
+  ROS_INFO("connecting modbus device");
+  sleep(60);
+
+    if(modbus_connect(p_ptx)==-1)
+    {
+        ROS_INFO("connecting modbus device");
+        ROS_ERROR("Modbus Connection failed with am error code %s",modbus_strerror(errno));
+        modbus_free(p_ptx);
+        return -1;
+        exit(0);
+    }
+    else
+    {
+        ROS_INFO("Modbus device connected Successfully");
     }
 }
 
 /**
- * @brief Reads a single register.
+ * @brief readRegister definition
+ * @brief readRegister will readData from single register and return integer value
+ * @arguements registerNumber to be read
  */
 int ModbusCommunicator::readRegister(int registerNumber)
 {
-    m_registerData[0] = 0;
-    if (modbus_read_registers(p_ptx, registerNumber, 1, m_registerData) == -1)
+  m_registerData[0]=0;
+
+  // ROS_INFO("reading data from register  %d",registerNumber);
+  if(modbus_read_registers(p_ptx,registerNumber,1,m_registerData)==-1)  //reading from modbus registers
     {
-        RCLCPP_ERROR(this->get_logger(), "Failed to read data from register: %s", modbus_strerror(errno));
-        return -1;
+        ROS_ERROR("failed to read data from register %s",modbus_strerror(errno));
+        //modbus_free(p_ptx);
+        
     }
-    return m_registerData[0];
+  else
+    {
+      return m_registerData[0];
+    }
+
 }
 
 /**
- * @brief Reads multiple registers.
+ * @brief readData definition
+ * @brief read data will be returned std::vector<uint16_t>
+ * @arguements number of registers to read data
+ * 
  */
-uint16_t* ModbusCommunicator::readData(int numberOfRegisters)
+uint16_t * ModbusCommunicator::readData(int numberOfRegisters)
 {
-    if (modbus_read_registers(p_ptx, 60, numberOfRegisters, p_readData) == -1)
+  if(modbus_read_registers(p_ptx,60,numberOfRegisters,p_readData)==-1)  //reading from modbus registers
     {
-        RCLCPP_ERROR(this->get_logger(), "Failed to read data from registers: %s", modbus_strerror(errno));
-        return nullptr;
+        ROS_ERROR("failed to read data from registers %s",modbus_strerror(errno));
+        //modbus_free(p_ptx);
+        
     }
-    return p_readData;
-}
-
-/**
- * @brief Writes data to a single register.
- */
-int ModbusCommunicator::writeDataToRegister(int registorNumber, uint32_t data)
-{
-    if (modbus_write_register(p_ptx, registorNumber, data) == -1)
+  else
     {
-        RCLCPP_ERROR(this->get_logger(), "Failed to write data to register %d: %s", registorNumber, modbus_strerror(errno));
+      return p_readData;
+    }
+
+
+}
+/**
+ * @brief writeData definition
+ * @arguements register number
+ */
+int ModbusCommunicator::writeDataToRegister(int registorNumber,uint32_t data)
+{
+    
+    if(modbus_write_register(p_ptx,registorNumber,data)==-1)
+    {
+        ROS_ERROR("failed to write data in to register number %d with an error number %s",registorNumber,modbus_strerror(errno));
+ //       modbus_free(p_ptx);
         return -1;
+    }
+    else
+    {
+      //ROS_INFO("written to %d value %d",registorNumber,data);
     }
     return 0;
 }
 
 /**
- * @brief Writes data to multiple registers.
+ * @brief writeData to registers
+ * @arguements registers number number of bytes and data 
  */
-int ModbusCommunicator::writeDataToRegisters(int registorNumber, char data[], int bytes)
+int ModbusCommunicator::writeDataToRegisters(int registorNumber,char data[],int bytes)
 {
-    int k = 0;
-    std::string arr[5] = {"", "", "", "", ""};
-    for (int i = 0; i < 20; i += 1)
+  int k=0;
+  
+    std::string arr[5]={"","","",""};
+    
+    for(int i=0;i<20;i+=1)
     {
-        if (i == 0 || i == 4 || i == 8 || i == 12 || i == 16)
-        {
-            std::string temp = "";
-            temp += data[i];
-            temp += data[i + 1];
-            temp += data[i + 2];
-            temp += data[i + 3];
-            arr[k] = temp;
-            RCLCPP_DEBUG(this->get_logger(), "Segment %d: %s", k, arr[k].c_str());
-            k++;
-        }
+        
+     if(i==0 || i==4 || i==8|| i==12 ||i==16)
+      {
+        
+        std::string temp="";
+        temp+=data[i];
+        temp+=data[i+1];
+        temp+=data[i+2];
+        temp+=data[i+3];
+
+        arr[k]= temp;
+      std::cout<<arr[k]<<std::endl;
+      k++;
+      }
+      
     }
-    uint16_t passingData[5] = {};
-    for (int i = 0; i < 5; i++)
+    uint16_t passingData[5]={};
+    for(int i=0;i<5;i++)
     {
-        passingData[i] = std::stoi(arr[i]);
+      passingData[i]=stoi(arr[i]);
     }
 
-    if (modbus_write_registers(p_ptx, registorNumber, 4, passingData) == -1)
+    if(modbus_write_registers(p_ptx,registorNumber,4,passingData)==-1)
     {
-        RCLCPP_ERROR(this->get_logger(), "Failed to write data to registers %d: %s", registorNumber, modbus_strerror(errno));
+        ROS_ERROR("failed to write data in to register number %d with an error number %s",registorNumber,modbus_strerror(errno));
+   //     modbus_free(p_ptx);
         return -1;
     }
-    return 0;
-}
-
-/**
- * @brief Main function to create and run the node.
- */
-int main(int argc, char * argv[])
-{
-    rclcpp::init(argc, argv);
-    rclcpp::NodeOptions options;
-    try {
-        auto node = std::make_shared<ModbusCommunicator>(options);
-        rclcpp::spin(node);
-    } catch (const std::runtime_error &e) {
-        RCLCPP_FATAL(rclcpp::get_logger("rclcpp"), "Modbus communicator failed to initialize: %s", e.what());
-    }
-    rclcpp::shutdown();
     return 0;
 }

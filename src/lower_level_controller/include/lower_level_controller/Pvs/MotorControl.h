@@ -1,11 +1,4 @@
 /**
- * @file MotorControl.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
-/**
 *@brief header file for MotorControl
 */
 #ifndef MOTOR_CONTROL_H

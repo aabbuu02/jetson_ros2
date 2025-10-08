@@ -1,0 +1,2 @@
+string process
+bool homingStatus

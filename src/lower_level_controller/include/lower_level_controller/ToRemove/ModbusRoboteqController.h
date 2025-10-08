@@ -1,10 +1,3 @@
-/**
- * @file ModbusRoboteqController.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 #ifndef MODBUS_ROBOTEQ_CONTROLLER_H
 #define MODBUS_ROBOTEQ_CONTROLLER_H
 

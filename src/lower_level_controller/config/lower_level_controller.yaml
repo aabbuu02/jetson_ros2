@@ -1,20 +1,27 @@
-lower_level_controller:
-  ros__parameters:
-    controller_type: 3  # ODrive mode (no PLC needed for testing)
-    robot:
-      wheel_seperation: 0.90
-      wheel_radius: 0.101
-      TPR: 16384
-    linear_vel_limit: 1.0
-    angular_vel_limit: 1.0
-    linear_acc_limit: 100.2
-    linear_decc_limit: 100.2
-    gearRatio: 9
-    odom_frame: odom_frame
-    base_frame: base_footprint
-    cmd_topic: cmd_vel
-    debug_cmd_topic: debug/cmd_vel
-    odom_topic: odom_
-    emergency_stop_topic: e_stop
-    barcode_topic: barcode/global
-    publish_tf: false
+controller_type: 1              # 1 - PLC alone
+                                # 2 - PLC with Roboteq
+                                # 3 - ODrive  
+
+robot:
+ wheel_seperation: 0.90        # Width of the robot base in meters
+ wheel_radius: 0.101             # Radius of robot wheel in meters
+ TPR: 16384                     # Ticks per rotation 4096*4*9   
+                               
+
+ linear_vel_limit: 1.0          # Linear velocity limit in m/s
+ angular_vel_limit: 1.0         # Angular velocity limit in rad/s
+ linear_acc_limit: 100.2          # Linear acceleration limit in m/s2
+ linear_decc_limit: 100.2        # Linear decceleration limit in m/s2
+ gearRatio: 9                   # Gear ratio used on motor transmission.
+
+ 
+odom_frame: odom_frame          # Odometry frame of the system
+base_frame: base_footprint      # Robot base frame for odom  publishing
+cmd_topic: cmd_vel
+debug_cmd_topic: debug/cmd_vel
+odom_topic: odom_
+emergency_stop_topic: e_stop
+barcode_topic: barcode/global
+
+publish_tf: false              # Publishes odom tf 
+

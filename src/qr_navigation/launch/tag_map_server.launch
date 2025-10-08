@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Set parameters -->
+  <!--rosparam command="load" file="$(find qr_navigation)/config/mapARAPL.yaml"/-->
+  <node pkg="qr_navigation" type="map_to_qr_new.py" name="map_to_qr_tf_broadcaster" respawn="false" clear_params="true" output="screen" >
+  </node>
+</launch>
+

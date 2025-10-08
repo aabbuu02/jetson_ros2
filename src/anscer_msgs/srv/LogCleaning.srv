@@ -1,5 +1,5 @@
-float32 cleaning_hour
-float32 cleaning_size
+float32 cleaningHour
+float32 cleaningSize
 
 uint8 USE_TIME_AND_SIZE=0
 uint8 BASED_ON_TIME=1

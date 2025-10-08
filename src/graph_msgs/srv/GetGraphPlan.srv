@@ -1,5 +1,12 @@
-uint32 start_node_id
-uint32 goal_node_id
+# Source and destination IDs
+uint32 source_id
+uint32 target_id
+bool ignore_goal_orientation
+bool ignore_path_orientation
 ---
-graph_msgs/Node[] path
+Vertex[] vertices_in_plan       # The vertices that are part of the plan
+nav_msgs/Path plan              # The plan from the pre-defined graph curves
+float64 plan_distance           # Total plan distance
 
+bool success                    # Whether planning was success
+string message                  # Messages related to planning

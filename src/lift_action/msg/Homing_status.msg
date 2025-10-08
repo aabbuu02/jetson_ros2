@@ -1,0 +1,4 @@
+bool lifterStatus
+bool extractorSatus
+bool turnTableStatus
+bool isHomed

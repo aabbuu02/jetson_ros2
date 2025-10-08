@@ -1,10 +1,3 @@
-/**
- * @file CommunicationSerial.h
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
-
 
 #ifndef COMMUNICATION_SERIAL_H
 #define COMMUNICATION_SERIAL_H

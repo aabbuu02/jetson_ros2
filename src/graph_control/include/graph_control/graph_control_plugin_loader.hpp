@@ -1,35 +1,25 @@
-/**
- * @file graph_control_plugin_loader.hpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
+#pragma once
 
-#ifndef GRAPH_CONTROL_PLUGIN_LOADER_HPP
-#define GRAPH_CONTROL_PLUGIN_LOADER_HPP
+#include <string>
 
-#include "rclcpp/rclcpp.hpp"
-#include "pluginlib/class_loader.hpp"
-#include "graph_control/base_graph_control.hpp"
-#include "graph_msgs/msg/graph.hpp"
-#include "geometry_msgs/msg/twist.hpp"
-#include <memory>
+#include <ros/ros.h>
+#include <pluginlib/class_loader.h>
 
-class GraphControlPluginLoader : public rclcpp::Node
+#include <graph_control/base_graph_control.hpp>
+
+class GraphControlPluginLoader
 {
-public:
-  explicit GraphControlPluginLoader(const rclcpp::NodeOptions & options);
+    public:
 
-private:
-  void graphCallback(const graph_msgs::msg::Graph::ConstSharedPtr& msg);
-  void controlLoop();
+    GraphControlPluginLoader();
 
-  std::unique_ptr<pluginlib::ClassLoader<graph_control::BaseGraphControl>> plugin_loader_;
-  std::shared_ptr<graph_control::BaseGraphControl> controller_;
+    bool isGraphControlPluginLoaded();
+    bool loadGraphControlPlugin(const std::string &graph_control_plugin_name);
+    boost::shared_ptr<graph_control::BaseGraphControl> getGraphControlInstance();
 
-  rclcpp::Subscription<graph_msgs::msg::Graph>::SharedPtr graph_sub_;
-  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
-  rclcpp::TimerBase::SharedPtr timer_;
+    private:
+
+    bool m_is_plugin_loaded = false;
+    pluginlib::ClassLoader<graph_control::BaseGraphControl> m_graph_control_loader;
+    boost::shared_ptr<graph_control::BaseGraphControl> m_graph_control_inst;
 };
-
-#endif // GRAPH_CONTROL_PLUGIN_LOADER_HPP

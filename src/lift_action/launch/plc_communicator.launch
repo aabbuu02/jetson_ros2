@@ -1,0 +1,5 @@
+<launch>
+  <rosparam command="load" file="$(find lift_action)/config/HigherLevelInterface.yaml"/>
+  <rosparam command="load" file="$(find lift_action)/config/ModbusCommunicator.yaml"/>
+  <node pkg="lift_action" type="modbus_communicator" name="modbus_communicator" output="screen"/>
+</launch>

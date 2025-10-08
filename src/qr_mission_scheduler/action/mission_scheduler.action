@@ -1,0 +1,8 @@
+#goal definition
+goalMsg goalType
+---
+#result definition
+string success
+---
+#feedback
+float64[]  pose

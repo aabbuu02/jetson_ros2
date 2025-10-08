@@ -1,25 +1,24 @@
-/**
- * @file base_graph_control.hpp
- * @author Abubakarsiddiq Navid shaikh
- * @date 2024-10-05
- * @brief Auto-generated author information
- */
+#pragma once
 
-#ifndef BASE_GRAPH_CONTROL_HPP
-#define BASE_GRAPH_CONTROL_HPP
+#include <string>
 
-#include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/twist.hpp"
-#include "graph_msgs/msg/graph.hpp"
+#include <ros/ros.h>
+#include <geometry_msgs/Pose.h>
 
 namespace graph_control
 {
-  class BaseGraphControl
-  {
-  public:
-    virtual ~BaseGraphControl() {}
-    virtual void initialize(rclcpp::Node* node, const graph_msgs::msg::Graph::ConstSharedPtr& graph) = 0;
-    virtual geometry_msgs::msg::Twist getCommand() = 0;
-  };
+    class BaseGraphControl
+    {
+        public:
+
+        virtual void initialize() = 0;
+        virtual void sendGoal(const std::string &vertex_name, uint32_t vertex_id, const geometry_msgs::Pose &vertex_pose) = 0;
+        virtual void cancelGoal() = 0;
+
+        virtual ~BaseGraphControl(){}
+
+        protected:
+
+        BaseGraphControl(){}
+    };
 }
-#endif // BASE_GRAPH_CONTROL_HPP
